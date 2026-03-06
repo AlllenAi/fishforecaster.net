@@ -1,10 +1,11 @@
-// Authentication context and types
+import type { SubscriptionTier } from "@prisma/client";
+
 export interface AuthContext {
   userId: string;
   email: string;
   name?: string;
   roles: string[];
-  permissions: string[];
+  subscriptionTier: SubscriptionTier;
 }
 
 export class UnauthorizedError extends Error {
@@ -41,5 +42,3 @@ export class NotFoundError extends Error {
     this.name = "NotFoundError";
   }
 }
-
-export type Permission = string;
