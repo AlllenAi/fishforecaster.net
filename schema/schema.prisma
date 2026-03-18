@@ -50,16 +50,19 @@ enum SubscriptionStatus {
 // ─── Auth Models (Auth.js) ───────────────────────────────
 
 model User {
-  id               String           @id @default(auto()) @map("_id") @db.ObjectId
-  email            String           @unique
-  name             String?
-  password         String?
-  emailVerified    DateTime?
-  image            String?
-  roles            String[]         @default(["user"])
-  subscriptionTier SubscriptionTier @default(FREE)
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  id                     String           @id @default(auto()) @map("_id") @db.ObjectId
+  email                  String           @unique
+  name                   String?
+  password               String?
+  emailVerified          DateTime?
+  image                  String?
+  roles                  String[]         @default(["user"])
+  subscriptionTier       SubscriptionTier @default(FREE)
+  unsubscribeToken       String?          @unique
+  subscribedToDigest     Boolean          @default(true)
+  subscribedToUpdates    Boolean          @default(true)
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
 
   accounts     Account[]
   sessions     Session[]
@@ -178,6 +181,7 @@ model Lead {
   email                  String   @unique
   source                 String   @default("landing_page")
   subscribedToNewsletter Boolean  @default(true)
+  unsubscribeToken       String?  @unique
   createdAt              DateTime @default(now())
 
   @@map("leads")

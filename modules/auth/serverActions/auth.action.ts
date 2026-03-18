@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { registerSchema, type RegisterInput } from "../types/auth.schema";
 import { ConflictError, ValidationError } from "@/lib/auth/types";
+import { sendWelcomeEmail } from "@/modules/email/serverActions/email.action";
 
 export async function register(input: RegisterInput) {
   const parsed = registerSchema.safeParse(input);
@@ -29,6 +30,11 @@ export async function register(input: RegisterInput) {
       subscriptionTier: "FREE",
     },
   });
+
+  // Send welcome email (fire and forget)
+  sendWelcomeEmail(user.id).catch((err) =>
+    console.error("[Auth] Failed to send welcome email:", err)
+  );
 
   return { success: true, userId: user.id };
 }
