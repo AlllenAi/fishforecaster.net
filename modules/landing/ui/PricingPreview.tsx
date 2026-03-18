@@ -53,10 +53,6 @@ const plans = [
 ];
 
 export function PricingPreview() {
-  const scrollToLead = () => {
-    document.getElementById("lead-capture")?.scrollIntoView({ behavior: "smooth" });
-  };
-
   return (
     <section className="px-4 py-24">
       <div className="mx-auto max-w-5xl">
@@ -106,9 +102,9 @@ export function PricingPreview() {
               <Button
                 className="mt-6 w-full"
                 variant={plan.highlighted ? "default" : "outline"}
-                onClick={scrollToLead}
+                asChild
               >
-                Join Waitlist
+                <a href="/pricing">Subscribe Now</a>
               </Button>
             </div>
           ))}

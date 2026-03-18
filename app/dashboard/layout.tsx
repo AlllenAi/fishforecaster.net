@@ -37,6 +37,7 @@ export default async function DashboardLayout({
             <UserMenu
               name={session.user.name || "User"}
               email={session.user.email || ""}
+              subscriptionTier={session.user.subscriptionTier ?? "FREE"}
             />
           </div>
         </div>

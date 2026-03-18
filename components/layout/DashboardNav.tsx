@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { href: "/dashboard", label: "Forecasts" },
   { href: "/dashboard/map", label: "Map" },
+  { href: "/dashboard/account", label: "Account" },
 ];
 
 export function DashboardNav() {

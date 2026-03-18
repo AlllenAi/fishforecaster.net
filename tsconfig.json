@@ -9,6 +9,7 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
+    "baseUrl": ".",
     "incremental": true,
     "noEmit": true,
     "allowJs": true,

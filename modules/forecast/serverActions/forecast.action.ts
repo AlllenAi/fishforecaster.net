@@ -12,10 +12,11 @@ import { prisma } from "@/lib/prisma";
 import { withAccess } from "@/lib/middleware/withAccess";
 import { withPermission } from "@/lib/middleware/withPermission";
 import type { AuthContext } from "@/lib/auth/types";
-import { NotFoundError } from "@/lib/auth/types";
+import { NotFoundError, PermissionError } from "@/lib/auth/types";
 import { generateForecast } from "../services/forecastOrchestrator";
 import { getForecastSchema, refreshForecastSchema } from "../types/forecast.schema";
 import type { ForecastResult } from "../types/scoring.types";
+import { checkTierAccess } from "@/modules/subscription/types/subscription.schema";
 
 // ─── Get Forecast for a Single Zone ─────────────────────────
 // Returns the forecast for a specific zone and date.
@@ -23,7 +24,7 @@ import type { ForecastResult } from "../types/scoring.types";
 // Otherwise, generates a fresh forecast.
 
 export const getForecast = withAccess(
-  async (_user: AuthContext, input: { zoneId: string; date?: string }): Promise<ForecastResult> => {
+  async (user: AuthContext, input: { zoneId: string; date?: string }): Promise<ForecastResult> => {
     const validated = getForecastSchema.parse(input);
 
     // Find the zone
@@ -32,6 +33,14 @@ export const getForecast = withAccess(
     });
 
     if (!zone) throw new NotFoundError("Zone not found");
+
+    // Check subscription tier access
+    if (!checkTierAccess(user.subscriptionTier, zone.waterType)) {
+      const planNeeded = zone.waterType === "FRESH" ? "Freshwater" : "Saltwater";
+      throw new PermissionError(
+        `Upgrade to the ${planNeeded} or All Access plan to view this forecast`
+      );
+    }
 
     // Determine the date (default to today)
     const date = validated.date ? new Date(validated.date) : new Date();
@@ -90,7 +99,7 @@ export const getForecast = withAccess(
 // Used for the main dashboard view.
 
 export const getForecasts = withAccess(
-  async (_user: AuthContext, input?: { date?: string }): Promise<ForecastResult[]> => {
+  async (user: AuthContext, input?: { date?: string }): Promise<(ForecastResult & { locked?: boolean })[]> => {
     const date = input?.date ? new Date(input.date) : new Date();
     date.setHours(0, 0, 0, 0);
 
@@ -103,6 +112,8 @@ export const getForecasts = withAccess(
     // Generate forecasts for all zones in parallel
     const forecasts = await Promise.all(
       zones.map(async (zone) => {
+        const hasAccess = checkTierAccess(user.subscriptionTier, zone.waterType);
+
         // Check cache first
         const existing = await prisma.forecast.findUnique({
           where: {
@@ -114,18 +125,20 @@ export const getForecasts = withAccess(
         });
 
         if (existing) {
-          return {
+          const result = {
             zoneId: zone.id,
             zoneName: zone.name,
             date: date.toISOString().split("T")[0],
-            score: existing.score,
-            label: existing.label,
+            score: hasAccess ? existing.score : 0,
+            label: hasAccess ? existing.label : ("POOR" as const),
             confidence: existing.confidence,
-            biteWindows: existing.biteWindows as ForecastResult["biteWindows"],
-            conditions: existing.conditions as ForecastResult["conditions"],
-            captainCall: existing.captainCall ?? "",
-            speciesScores: existing.speciesScores as ForecastResult["speciesScores"],
-          } as ForecastResult;
+            biteWindows: hasAccess ? (existing.biteWindows as ForecastResult["biteWindows"]) : [],
+            conditions: hasAccess ? (existing.conditions as ForecastResult["conditions"]) : ({} as ForecastResult["conditions"]),
+            captainCall: hasAccess ? (existing.captainCall ?? "") : "Upgrade to unlock this forecast",
+            speciesScores: hasAccess ? (existing.speciesScores as ForecastResult["speciesScores"]) : [],
+            locked: !hasAccess,
+          };
+          return result;
         }
 
         // Generate fresh
@@ -146,7 +159,21 @@ export const getForecasts = withAccess(
           },
         });
 
-        return forecast;
+        // If locked, return teaser data
+        if (!hasAccess) {
+          return {
+            ...forecast,
+            score: 0,
+            label: "POOR" as const,
+            biteWindows: [],
+            conditions: {} as ForecastResult["conditions"],
+            captainCall: "Upgrade to unlock this forecast",
+            speciesScores: [],
+            locked: true,
+          };
+        }
+
+        return { ...forecast, locked: false };
       })
     );
 
