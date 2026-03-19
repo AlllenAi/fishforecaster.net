@@ -61,6 +61,11 @@ model User {
   unsubscribeToken       String?          @unique
   subscribedToDigest     Boolean          @default(true)
   subscribedToUpdates    Boolean          @default(true)
+  favoriteZoneIds        String[]         @default([])
+  pushSubscription       Json?
+  notifyHighScore        Boolean          @default(true)
+  notifyBiteWindow       Boolean          @default(true)
+  highScoreThreshold     Int              @default(80)
   createdAt              DateTime         @default(now())
   updatedAt              DateTime         @updatedAt
 
@@ -167,7 +172,9 @@ model CatchReport {
   lure       String?
   weight     Float?
   photoUrl   String?
+  notes      String?
   isVerified Boolean  @default(false)
+  isDeleted  Boolean  @default(false)
   createdAt  DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
