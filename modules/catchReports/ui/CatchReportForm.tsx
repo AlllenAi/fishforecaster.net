@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useSubmitCatch } from "../hooks/useSubmitCatch";
 import { useQuery } from "@tanstack/react-query";
 import { getZones } from "@/modules/forecast/serverActions/zone.action";
-import { Fish, MapPin, Send } from "lucide-react";
+import { uploadCatchPhoto } from "../services/imageUploadService";
+import { Fish, MapPin, Send, Camera, X } from "lucide-react";
+import { toast } from "sonner";
 
 interface CatchReportFormProps {
   defaultZoneId?: string;
@@ -27,13 +29,56 @@ export function CatchReportForm({ defaultZoneId, onSuccess }: CatchReportFormPro
   const [lure, setLure] = useState("");
   const [weight, setWeight] = useState("");
   const [notes, setNotes] = useState("");
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Get species for selected zone
   const selectedZone = zones?.find((z) => z.id === zoneId);
   const zoneSpecies = selectedZone?.species || [];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      toast.error("Image must be JPEG, PNG, or WebP");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be under 5MB");
+      return;
+    }
+
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
+  };
+
+  const clearPhoto = () => {
+    setPhotoFile(null);
+    if (photoPreview) URL.revokeObjectURL(photoPreview);
+    setPhotoPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    let photoUrl: string | undefined;
+    if (photoFile) {
+      try {
+        setIsUploading(true);
+        photoUrl = await uploadCatchPhoto(photoFile);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Photo upload failed");
+        setIsUploading(false);
+        return;
+      } finally {
+        setIsUploading(false);
+      }
+    }
 
     submitCatch(
       {
@@ -47,6 +92,7 @@ export function CatchReportForm({ defaultZoneId, onSuccess }: CatchReportFormPro
         lure: lure || undefined,
         weight: weight ? parseFloat(weight) : undefined,
         notes: notes || undefined,
+        photoUrl,
       },
       {
         onSuccess: () => {
@@ -54,6 +100,7 @@ export function CatchReportForm({ defaultZoneId, onSuccess }: CatchReportFormPro
           setLure("");
           setWeight("");
           setNotes("");
+          clearPhoto();
           onSuccess?.();
         },
       }
@@ -157,6 +204,38 @@ export function CatchReportForm({ defaultZoneId, onSuccess }: CatchReportFormPro
         </div>
       </div>
 
+      {/* Photo */}
+      <div>
+        <label className="mb-1.5 block text-sm font-medium">
+          <Camera className="mr-1 inline h-3.5 w-3.5" />
+          Photo
+        </label>
+        {photoPreview ? (
+          <div className="relative">
+            <img
+              src={photoPreview}
+              alt="Catch preview"
+              className="h-40 w-full rounded-lg object-cover"
+            />
+            <button
+              type="button"
+              onClick={clearPhoto}
+              className="absolute right-2 top-2 rounded-full bg-black/60 p-1 text-white hover:bg-black/80"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={handlePhotoChange}
+            className="w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-sm file:font-medium"
+          />
+        )}
+      </div>
+
       {/* Notes */}
       <div>
         <label className="mb-1.5 block text-sm font-medium">Notes</label>
@@ -170,9 +249,9 @@ export function CatchReportForm({ defaultZoneId, onSuccess }: CatchReportFormPro
         />
       </div>
 
-      <Button type="submit" disabled={isPending} className="w-full">
+      <Button type="submit" disabled={isPending || isUploading} className="w-full">
         <Send className="mr-2 h-4 w-4" />
-        {isPending ? "Submitting..." : "Submit Catch Report"}
+        {isUploading ? "Uploading photo..." : isPending ? "Submitting..." : "Submit Catch Report"}
       </Button>
     </form>
   );
