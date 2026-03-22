@@ -31,8 +31,8 @@ export interface SubscriptionInfo {
 export const PLAN_CONFIG = {
   FRESHWATER: {
     name: "Freshwater",
-    price: "$9",
-    period: "/month",
+    price: "$7",
+    period: "/3 months",
     description: "All freshwater zones",
     envKey: "STRIPE_FRESHWATER_PRICE_ID",
     features: [
@@ -46,8 +46,8 @@ export const PLAN_CONFIG = {
   },
   SALTWATER: {
     name: "Saltwater",
-    price: "$9",
-    period: "/month",
+    price: "$7",
+    period: "/3 months",
     description: "All saltwater zones",
     envKey: "STRIPE_SALTWATER_PRICE_ID",
     features: [
@@ -62,7 +62,7 @@ export const PLAN_CONFIG = {
   ALL_ACCESS: {
     name: "All Access",
     price: "$12",
-    period: "/month",
+    period: "/3 months",
     description: "Everything, all zones",
     envKey: "STRIPE_ALL_ACCESS_PRICE_ID",
     badge: "Best Value",

@@ -1,19 +1,20 @@
 "use client";
 
+import { useState } from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { MapPin, Clock, Fish, Weight, Anchor } from "lucide-react";
 import type { CatchReportWithUser } from "../types/catchReport.schema";
 
-function getRecencyColor(caughtAt: Date): string {
-  const hoursAgo = (Date.now() - new Date(caughtAt).getTime()) / (1000 * 60 * 60);
+function getRecencyColor(hoursAgo: number): string {
   if (hoursAgo <= 24) return "border-red-500/50 bg-red-500/5";
   if (hoursAgo <= 72) return "border-orange-500/50 bg-orange-500/5";
   return "border-muted";
 }
 
 export function CatchReportCard({ report }: { report: CatchReportWithUser }) {
-  const hoursAgo = Math.floor(
-    (Date.now() - new Date(report.caughtAt).getTime()) / (1000 * 60 * 60)
+  const [hoursAgo] = useState(
+    () => Math.floor((Date.now() - new Date(report.caughtAt).getTime()) / (1000 * 60 * 60))
   );
   const timeLabel =
     hoursAgo < 1
@@ -23,13 +24,15 @@ export function CatchReportCard({ report }: { report: CatchReportWithUser }) {
         : `${Math.floor(hoursAgo / 24)}d ago`;
 
   return (
-    <div className={cn("rounded-xl border p-4 transition-all", getRecencyColor(report.caughtAt))}>
+    <div className={cn("rounded-xl border p-4 transition-all", getRecencyColor(hoursAgo))}>
       {/* Photo */}
       {report.photoUrl && (
         <div className="mb-3 overflow-hidden rounded-lg">
-          <img
+          <Image
             src={report.photoUrl}
             alt={`${report.species} catch`}
+            width={400}
+            height={160}
             className="h-40 w-full object-cover"
           />
         </div>

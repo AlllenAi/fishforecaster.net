@@ -212,6 +212,7 @@ export function CatchReportForm({ defaultZoneId, onSuccess }: CatchReportFormPro
         </label>
         {photoPreview ? (
           <div className="relative">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={photoPreview}
               alt="Catch preview"

@@ -121,7 +121,7 @@ export async function GET(req: NextRequest) {
     // Send the digest
     const result = await sendWeeklyDigest(topDays, dateRange);
 
-    console.log(`[Cron] Weekly digest sent to ${result.sent} recipients`);
+    console.warn(`[Cron] Weekly digest sent to ${result.sent} recipients`);
 
     return NextResponse.json({
       success: true,

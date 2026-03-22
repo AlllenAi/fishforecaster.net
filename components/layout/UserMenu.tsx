@@ -1,7 +1,7 @@
 "use client";
 
 import { signOut } from "next-auth/react";
-import { LogOut, User, CreditCard } from "lucide-react";
+import { LogOut, User, CreditCard, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -18,9 +18,10 @@ interface UserMenuProps {
   name: string;
   email: string;
   subscriptionTier?: "FREE" | "FRESHWATER" | "SALTWATER" | "ALL_ACCESS";
+  isAdmin?: boolean;
 }
 
-export function UserMenu({ name, email, subscriptionTier = "FREE" }: UserMenuProps) {
+export function UserMenu({ name, email, subscriptionTier = "FREE", isAdmin }: UserMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -44,6 +45,14 @@ export function UserMenu({ name, email, subscriptionTier = "FREE" }: UserMenuPro
             Account & Billing
           </Link>
         </DropdownMenuItem>
+        {isAdmin && (
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard/admin">
+              <Shield className="mr-2 h-4 w-4" />
+              Admin Dashboard
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem
           onClick={() => signOut({ callbackUrl: "/" })}
           className="text-destructive focus:text-destructive"

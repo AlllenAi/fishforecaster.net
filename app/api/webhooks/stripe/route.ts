@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  console.log(`[Stripe Webhook] Event: ${event.type} (${event.id})`);
+  console.warn(`[Stripe Webhook] Event: ${event.type} (${event.id})`);
 
   try {
     switch (event.type) {
@@ -220,7 +220,7 @@ export async function POST(req: NextRequest) {
       }
 
       default:
-        console.log(`[Stripe Webhook] Unhandled event type: ${event.type}`);
+        console.warn(`[Stripe Webhook] Unhandled event type: ${event.type}`);
     }
   } catch (err) {
     console.error(`[Stripe Webhook] Error processing ${event.type}:`, err);

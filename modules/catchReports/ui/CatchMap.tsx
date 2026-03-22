@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -31,6 +31,8 @@ function getSpeciesColor(species: string): string {
 }
 
 export function CatchMap({ reports }: { reports: CatchMapPin[] }) {
+  const [now] = useState(() => Date.now());
+
   useEffect(() => {
     const L = require("leaflet");
     delete L.Icon.Default.prototype._getIconUrl;
@@ -59,7 +61,7 @@ export function CatchMap({ reports }: { reports: CatchMapPin[] }) {
       {reports.map((report) => {
         const color = getSpeciesColor(report.species);
         const hoursAgo = Math.floor(
-          (Date.now() - new Date(report.caughtAt).getTime()) / (1000 * 60 * 60)
+          (now - new Date(report.caughtAt).getTime()) / (1000 * 60 * 60)
         );
         const timeLabel =
           hoursAgo < 1

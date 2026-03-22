@@ -73,7 +73,6 @@ export async function getWeatherData(
 // The raw API response is deeply nested. We pull out just what we need
 // and flatten it into a clean structure.
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 function parseWeatherResponse(json: any): WeatherData {
   const current = json.current;
   const forecast = json.forecast?.forecastday?.[0];
@@ -112,4 +111,3 @@ function parseWeatherResponse(json: any): WeatherData {
     },
   };
 }
-/* eslint-enable @typescript-eslint/no-explicit-any */

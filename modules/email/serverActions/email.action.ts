@@ -150,7 +150,7 @@ export async function sendWeeklyDigest(topDays: DigestDay[], dateRange: string) 
     });
   }
 
-  console.log(`[Email] Sending weekly digest to ${emailBatch.length} recipients`);
+  console.warn(`[Email] Sending weekly digest to ${emailBatch.length} recipients`);
   await sendBatchEmails(emailBatch);
 
   return { sent: emailBatch.length };

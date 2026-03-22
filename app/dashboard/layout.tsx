@@ -17,6 +17,8 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
+  const isAdmin = session.user.roles?.includes("admin") ?? false;
+
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -30,7 +32,7 @@ export default async function DashboardLayout({
               <span className="hidden sm:inline">The Fish Forecaster</span>
               <span className="sm:hidden">TFF</span>
             </Link>
-            <DashboardNav />
+            <DashboardNav isAdmin={isAdmin} />
           </div>
           <div className="flex items-center gap-2">
             <ModeToggle />
@@ -38,6 +40,7 @@ export default async function DashboardLayout({
               name={session.user.name || "User"}
               email={session.user.email || ""}
               subscriptionTier={session.user.subscriptionTier ?? "FREE"}
+              isAdmin={isAdmin}
             />
           </div>
         </div>

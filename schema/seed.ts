@@ -162,6 +162,7 @@ const ZONES = [
 ];
 
 async function seed() {
+  // eslint-disable-next-line no-console
   console.log("Seeding zones...\n");
 
   for (const zone of ZONES) {
@@ -192,9 +193,11 @@ async function seed() {
       },
     });
 
+    // eslint-disable-next-line no-console
     console.log(`  ✓ ${result.name} (${result.waterType})`);
   }
 
+  // eslint-disable-next-line no-console
   console.log(`\nDone! Seeded ${ZONES.length} zones.`);
 }
 
