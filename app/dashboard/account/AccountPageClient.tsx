@@ -3,6 +3,7 @@
 import { User, Mail, Bell } from "lucide-react";
 import { SubscriptionStatus } from "@/modules/subscription/ui/SubscriptionStatus";
 import { useEmailPreferences } from "@/modules/email/hooks/useEmailPreferences";
+import { NotificationPreferences } from "@/modules/notifications/ui/NotificationPreferences";
 
 interface AccountPageClientProps {
   name: string;
@@ -36,6 +37,9 @@ export function AccountPageClient({ name, email }: AccountPageClientProps) {
 
       {/* Subscription */}
       <SubscriptionStatus />
+
+      {/* Fishing Alerts */}
+      <NotificationPreferences />
 
       {/* Email Preferences */}
       <div className="rounded-xl border p-6">
