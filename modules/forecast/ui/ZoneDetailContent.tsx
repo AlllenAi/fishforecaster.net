@@ -5,7 +5,7 @@ import { useZoneDetail } from "../hooks/useZoneDetail";
 import { useForecast } from "../hooks/useForecast";
 import { ScoreCircle } from "./ScoreCircle";
 import { ScoreLabel } from "./ScoreLabel";
-import { BiteWindowCard } from "./BiteWindowCard";
+import { BiteWindowTimeline } from "./BiteWindowTimeline";
 import { ConditionsGrid } from "./ConditionsGrid";
 import { SpeciesScoreRow } from "./SpeciesScoreRow";
 import { CaptainCall } from "./CaptainCall";
@@ -102,17 +102,11 @@ export function ZoneDetailContent({ slug }: { slug: string }) {
           {/* Bite Windows */}
           <section>
             <h2 className="mb-4 text-lg font-semibold">Bite Windows</h2>
-            {forecast.biteWindows.length > 0 ? (
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {forecast.biteWindows.map((w, i) => (
-                  <BiteWindowCard key={i} window={w} />
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                No bite windows available for this date.
-              </p>
-            )}
+            <BiteWindowTimeline
+              windows={forecast.biteWindows}
+              sunrise={forecast.conditions.sunrise}
+              sunset={forecast.conditions.sunset}
+            />
           </section>
 
           {/* Conditions */}

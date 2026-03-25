@@ -5,9 +5,11 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useForecasts } from "../hooks/useForecasts";
 import { ZoneCard } from "./ZoneCard";
 import { WaterTypeToggle } from "./WaterTypeToggle";
+import { SpeciesFilter } from "./SpeciesFilter";
 import { DatePicker } from "./DatePicker";
 import type { ForecastResult } from "../types/scoring.types";
 
@@ -19,21 +21,56 @@ function formatToday(): string {
   return `${year}-${month}-${day}`;
 }
 
+type WaterFilter = "ALL" | "SALT" | "FRESH";
 type SortOption = "score" | "name" | "waterType";
+
+function useFilterParams() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const water = (searchParams.get("water") as WaterFilter) || "ALL";
+  const species = searchParams.get("species")?.split(",").filter(Boolean) ?? [];
+  const sort = (searchParams.get("sort") as SortOption) || "score";
+
+  function setParams(updates: Record<string, string | null>) {
+    const params = new URLSearchParams(searchParams.toString());
+    for (const [key, val] of Object.entries(updates)) {
+      if (val === null || val === "") params.delete(key);
+      else params.set(key, val);
+    }
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  }
+
+  return {
+    water,
+    species,
+    sort,
+    setWater: (v: WaterFilter) => setParams({ water: v === "ALL" ? null : v }),
+    setSpecies: (v: string[]) => setParams({ species: v.length ? v.join(",") : null }),
+    setSort: (v: SortOption) => setParams({ sort: v === "score" ? null : v }),
+  };
+}
 
 export function DashboardContent() {
   const [date, setDate] = useState(formatToday);
-  const [waterFilter, setWaterFilter] = useState<"ALL" | "SALT" | "FRESH">("ALL");
-  const [sortBy, setSortBy] = useState<SortOption>("score");
+  const { water: waterFilter, species: speciesFilter, sort: sortBy, setWater, setSpecies, setSort } = useFilterParams();
 
   const { data: forecasts, isLoading, error } = useForecasts(date);
 
   // Filter by water type
-  const filtered = (forecasts ?? []).filter((f) => {
+  let filtered = (forecasts ?? []).filter((f) => {
     if (waterFilter === "ALL") return true;
     const isSalt = f.conditions.tideDirection !== null;
     return waterFilter === "SALT" ? isSalt : !isSalt;
   });
+
+  // Filter by species
+  if (speciesFilter.length > 0) {
+    filtered = filtered.filter((f) =>
+      f.speciesScores.some((s) => speciesFilter.includes(s.species))
+    );
+  }
 
   // Sort
   const sorted = [...filtered].sort((a, b) => {
@@ -52,13 +89,18 @@ export function DashboardContent() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-3">
           <DatePicker value={date} onChange={setDate} />
-          <WaterTypeToggle value={waterFilter} onChange={setWaterFilter} />
+          <WaterTypeToggle value={waterFilter} onChange={setWater} />
+          <SpeciesFilter
+            forecasts={forecasts ?? []}
+            value={speciesFilter}
+            onChange={setSpecies}
+          />
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">Sort:</span>
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as SortOption)}
+            onChange={(e) => setSort(e.target.value as SortOption)}
             className="rounded-md border bg-muted px-2 py-1 text-sm text-foreground"
           >
             <option value="score">Best Score</option>

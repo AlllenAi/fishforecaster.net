@@ -1,11 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import { useState } from "react";
 import { useForgotPassword } from "@/modules/auth/hooks/useForgotPassword";
 import { Button } from "@/components/ui/button";
-
-export const metadata = {
-  title: "Forgot Password - The Fish Forecaster",
-};
 
 export default function ForgotPasswordPage() {
   const { mutate: sendResetEmail, isPending } = useForgotPassword();

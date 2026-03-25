@@ -1,12 +1,10 @@
+"use client";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { updateForgottenPassword } from "@/modules/auth/serverActions/auth.action";
-
-export const metadata = {
-  title: "Reset Password - The Fish Forecaster",
-};
 
 export default function ResetPasswordPage({ searchParams }: { searchParams: { token?: string } }) {
   const router = useRouter();

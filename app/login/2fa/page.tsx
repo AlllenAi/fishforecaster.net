@@ -1,13 +1,11 @@
+"use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { verifyTwoFactorCode } from "@/modules/auth/serverActions/auth.action";
 import { toast } from "sonner";
 import { trackAuthEvent, setSentryBreadcrumb } from "@/lib/telemetry";
-
-export const metadata = {
-  title: "Two-Factor Authentication - The Fish Forecaster",
-};
 
 export default function TwoFactorPage() {
   const router = useRouter();

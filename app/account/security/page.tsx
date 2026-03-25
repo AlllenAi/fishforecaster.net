@@ -4,10 +4,6 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
-export const metadata = {
-  title: "Security Settings - The Fish Forecaster",
-};
-
 export default function SecuritySettingsPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
