@@ -5,7 +5,8 @@
       "Bash(yarn lint)",
       "Bash(npx eslint . --max-warnings 0)",
       "Bash(yarn db:push)",
-      "Bash(gh issue view 2)"
+      "Bash(gh issue view 2)",
+      "Bash(node -e \":*)"
     ]
   }
 }

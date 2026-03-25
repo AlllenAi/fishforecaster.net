@@ -54,6 +54,10 @@ model User {
   email                  String           @unique
   name                   String?
   password               String?
+  twoFactorEnabled       Boolean          @default(false)
+  twoFactorSecret        String?
+  passwordResetToken     String?          @unique
+  passwordResetExpiresAt DateTime?
   emailVerified          DateTime?
   image                  String?
   roles                  String[]         @default(["user"])

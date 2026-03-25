@@ -5,28 +5,38 @@ import { toast } from "sonner";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import type { LoginInput } from "../types/auth.schema";
+import { trackAuthEvent, setSentryBreadcrumb } from "@/lib/telemetry";
 
 export function useLogin() {
   const router = useRouter();
 
   return useMutation({
     mutationFn: async (input: LoginInput) => {
-      const result = await signIn("credentials", {
+      const signInResult = await signIn("credentials", {
         email: input.email,
         password: input.password,
+        twoFactorCode: input.twoFactorCode,
+        rememberMe: input.rememberMe ? "1" : "0",
         redirect: false,
       });
 
-      if (result?.error) throw new Error("Invalid email or password");
-      return result;
+      if (signInResult?.error) {
+        throw new Error(signInResult.error || "Invalid email or password");
+      }
+
+      return signInResult;
     },
     onSuccess: () => {
       toast.success("Welcome back!");
+      trackAuthEvent("login_success");
+      setSentryBreadcrumb("Login successful");
       router.push("/dashboard");
       router.refresh();
     },
     onError: (error: Error) => {
       toast.error(error.message);
+      trackAuthEvent("login_failed", { message: error.message });
+      setSentryBreadcrumb("Login failed", { message: error.message });
     },
   });
 }
