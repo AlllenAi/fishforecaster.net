@@ -12,6 +12,7 @@ import {
 } from "../types/subscription.schema";
 import type { CheckoutInput, SubscriptionStatusResponse } from "../types/subscription.schema";
 import { checkAndExpireSubscription } from "../services/subscriptionService";
+import { createBillingPortalSession } from "../services/stripeService";
 
 // ─── Create Checkout Session ────────────────────────────
 // Creates a Stripe Checkout session for a one-time payment.
@@ -112,5 +113,30 @@ export const getSubscriptionStatus = withAccess(
       currentPeriodEnd: subscription.currentPeriodEnd,
       cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
     };
+  }
+);
+
+// ─── Create Portal Session ──────────────────────────────
+// Returns a Stripe Billing Portal URL so the user can view
+// their payment history.
+
+export const createPortalSession = withAccess(
+  async (user: AuthContext): Promise<{ url: string }> => {
+    const subscription = await prisma.subscription.findUnique({
+      where: { userId: user.userId },
+    });
+
+    if (!subscription?.stripeCustomerId) {
+      throw new Error("No subscription found");
+    }
+
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+    const session = await createBillingPortalSession(
+      subscription.stripeCustomerId,
+      `${baseUrl}/dashboard/account`
+    );
+
+    return { url: session.url };
   }
 );

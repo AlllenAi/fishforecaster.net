@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import type { SubscriptionPlan, SubscriptionTier, WaterType } from "@prisma/client";
+import type { SubscriptionPlan, SubscriptionTier } from "@prisma/client";
 import { ACCESS_PERIOD_MONTHS } from "../types/subscription.schema";
 
 // ─── Activate Subscription ──────────────────────────────
@@ -95,15 +95,3 @@ export async function checkAndExpireSubscription(
   return tierMap[subscription.plan];
 }
 
-// ─── Tier Access Check ──────────────────────────────────
-// Returns whether a given tier allows access to a water type.
-
-export function tierAllowsWaterType(
-  tier: SubscriptionTier,
-  waterType: WaterType
-): boolean {
-  if (tier === "ALL_ACCESS") return true;
-  if (tier === "FRESHWATER" && waterType === "FRESH") return true;
-  if (tier === "SALTWATER" && waterType === "SALT") return true;
-  return false;
-}

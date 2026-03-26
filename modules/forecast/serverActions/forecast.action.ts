@@ -13,7 +13,8 @@ import { withAccess } from "@/lib/middleware/withAccess";
 import { withPermission } from "@/lib/middleware/withPermission";
 import type { AuthContext } from "@/lib/auth/types";
 import { NotFoundError, PermissionError } from "@/lib/auth/types";
-import { checkAndExpireSubscription, tierAllowsWaterType } from "@/modules/subscription/services/subscriptionService";
+import { checkAndExpireSubscription } from "@/modules/subscription/services/subscriptionService";
+import { checkTierAccess } from "@/modules/subscription/types/subscription.schema";
 import { generateForecast } from "../services/forecastOrchestrator";
 import { getForecastSchema, refreshForecastSchema } from "../types/forecast.schema";
 import type { ForecastResult } from "../types/scoring.types";
@@ -36,7 +37,7 @@ export const getForecast = withAccess(
 
     // Check if user's subscription tier allows access to this zone's water type
     const tier = await checkAndExpireSubscription(user.userId);
-    if (!tierAllowsWaterType(tier, zone.waterType)) {
+    if (!checkTierAccess(tier, zone.waterType)) {
       throw new PermissionError(
         "Your subscription does not include access to this zone. Upgrade your plan to view this forecast."
       );
@@ -114,7 +115,7 @@ export const getForecasts = withAccess(
 
     // Filter zones based on subscription tier
     const zones = allZones.filter((zone) =>
-      tierAllowsWaterType(tier, zone.waterType)
+      checkTierAccess(tier, zone.waterType)
     );
 
     // Generate forecasts for all zones in parallel
