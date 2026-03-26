@@ -1,92 +1,44 @@
 import { z } from "zod";
+import type { SubscriptionPlan } from "@prisma/client";
 
-// ─── Plan Enum ───────────────────────────────────────────────
-export const subscriptionPlanSchema = z.enum([
-  "FRESHWATER",
-  "SALTWATER",
-  "ALL_ACCESS",
-]);
+// ─── Zod Schemas ─────────────────────────────────────────
 
-export type Plan = z.infer<typeof subscriptionPlanSchema>;
-
-// ─── Checkout Input ──────────────────────────────────────────
-export const createCheckoutSchema = z.object({
-  plan: subscriptionPlanSchema,
+export const checkoutInputSchema = z.object({
+  plan: z.enum(["FRESHWATER", "SALTWATER", "ALL_ACCESS"]),
 });
 
-export type CreateCheckoutInput = z.infer<typeof createCheckoutSchema>;
+export type CheckoutInput = z.infer<typeof checkoutInputSchema>;
 
-// ─── Subscription Status Response ────────────────────────────
-export interface SubscriptionInfo {
-  plan: Plan | null;
-  status: "ACTIVE" | "CANCELED" | "PAST_DUE" | "TRIALING" | null;
-  tier: "FREE" | "FRESHWATER" | "SALTWATER" | "ALL_ACCESS";
-  currentPeriodEnd: Date | null;
-  cancelAtPeriodEnd: boolean;
-  stripeCustomerId: string | null;
-}
+// ─── Price Constants (in cents) ──────────────────────────
 
-// ─── Plan Config ─────────────────────────────────────────────
-// Maps plan names to Stripe price IDs and display info
-export const PLAN_CONFIG = {
-  FRESHWATER: {
-    name: "Freshwater",
-    price: "$7",
-    period: "/3 months",
-    description: "All freshwater zones",
-    envKey: "STRIPE_FRESHWATER_PRICE_ID",
-    features: [
-      "5 freshwater zone forecasts",
-      "Daily bite scores",
-      "Bite window predictions",
-      "Species-specific scores",
-      "Captain's Call recommendations",
-      "Map dashboard",
-    ],
-  },
-  SALTWATER: {
-    name: "Saltwater",
-    price: "$7",
-    period: "/3 months",
-    description: "All saltwater zones",
-    envKey: "STRIPE_SALTWATER_PRICE_ID",
-    features: [
-      "8 saltwater zone forecasts",
-      "Daily bite scores",
-      "Bite window predictions",
-      "Species-specific scores",
-      "Captain's Call recommendations",
-      "Map dashboard",
-    ],
-  },
-  ALL_ACCESS: {
-    name: "All Access",
-    price: "$12",
-    period: "/3 months",
-    description: "Everything, all zones",
-    envKey: "STRIPE_ALL_ACCESS_PRICE_ID",
-    badge: "Best Value",
-    features: [
-      "All 13 zone forecasts",
-      "Saltwater + freshwater",
-      "Daily bite scores",
-      "Bite window predictions",
-      "Species-specific scores",
-      "Captain's Call recommendations",
-      "Map dashboard",
-      "Priority support",
-    ],
-  },
-} as const;
+export const PLAN_PRICES: Record<SubscriptionPlan, number> = {
+  FRESHWATER: 700,
+  SALTWATER: 700,
+  ALL_ACCESS: 1200,
+};
 
-// ─── Tier Access Logic ───────────────────────────────────────
-// Determines if a subscription tier can access a given water type
-export function checkTierAccess(
-  tier: "FREE" | "FRESHWATER" | "SALTWATER" | "ALL_ACCESS",
-  waterType: "SALT" | "FRESH"
-): boolean {
-  if (tier === "ALL_ACCESS") return true;
-  if (tier === "FRESHWATER" && waterType === "FRESH") return true;
-  if (tier === "SALTWATER" && waterType === "SALT") return true;
-  return false;
+export const PLAN_DISPLAY_NAMES: Record<SubscriptionPlan, string> = {
+  FRESHWATER: "Freshwater",
+  SALTWATER: "Saltwater",
+  ALL_ACCESS: "All Access",
+};
+
+export const PLAN_DESCRIPTIONS: Record<SubscriptionPlan, string> = {
+  FRESHWATER: "All freshwater zone forecasts",
+  SALTWATER: "All saltwater zone forecasts",
+  ALL_ACCESS: "All freshwater & saltwater zone forecasts",
+};
+
+// 3 months of access per purchase
+export const ACCESS_PERIOD_MONTHS = 3;
+
+// ─── Subscription Status Types ───────────────────────────
+
+export interface SubscriptionStatusResponse {
+  plan: SubscriptionPlan;
+  status: string;
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
+  daysRemaining: number;
 }

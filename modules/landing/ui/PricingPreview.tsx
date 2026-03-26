@@ -8,7 +8,7 @@ const plans = [
   {
     name: "Freshwater",
     price: "$7",
-    period: "/3 months",
+    period: "/ 3 months",
     description: "All freshwater zones",
     features: [
       "5 freshwater zone forecasts",
@@ -22,7 +22,7 @@ const plans = [
   {
     name: "All Access",
     price: "$12",
-    period: "/3 months",
+    period: "/ 3 months",
     description: "Everything, all zones",
     features: [
       "All 13 zone forecasts",
@@ -39,7 +39,7 @@ const plans = [
   {
     name: "Saltwater",
     price: "$7",
-    period: "/3 months",
+    period: "/ 3 months",
     description: "All saltwater zones",
     features: [
       "8 saltwater zone forecasts",
@@ -60,7 +60,7 @@ export function PricingPreview() {
           Simple, Honest <span className="text-primary">Pricing</span>
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-center text-muted-foreground">
-          Choose the water you fish. Cancel anytime.
+          Choose the water you fish. One-time payment, 3 months access.
         </p>
 
         <div className="mt-12 grid gap-6 sm:grid-cols-3">
@@ -104,7 +104,7 @@ export function PricingPreview() {
                 variant={plan.highlighted ? "default" : "outline"}
                 asChild
               >
-                <a href="/pricing">Subscribe Now</a>
+                <a href="/register">Get Started</a>
               </Button>
             </div>
           ))}

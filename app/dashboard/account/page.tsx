@@ -1,18 +1,18 @@
-import { auth } from "@/lib/auth/auth";
-import { redirect } from "next/navigation";
-import { AccountPageClient } from "./AccountPageClient";
+import { Suspense } from "react";
+import { AccountBilling } from "@/modules/subscription/ui/AccountBilling";
 
-export default async function AccountPage() {
-  const session = await auth();
+export const metadata = {
+  title: "Account & Billing | The Fish Forecaster",
+};
 
-  if (!session?.user) {
-    redirect("/login");
-  }
-
+export default function AccountPage() {
   return (
-    <AccountPageClient
-      name={session.user.name || "User"}
-      email={session.user.email || ""}
-    />
+    <Suspense
+      fallback={
+        <div className="h-64 animate-pulse rounded-xl border bg-card" />
+      }
+    >
+      <AccountBilling />
+    </Suspense>
   );
 }

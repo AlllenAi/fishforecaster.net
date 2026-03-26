@@ -4,6 +4,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import speakeasy from "speakeasy";
 import { prisma } from "@/lib/prisma";
+import type { SubscriptionTier } from "@prisma/client";
 import { authConfig } from "./auth.config";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -56,4 +57,38 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
     }),
   ],
+  callbacks: {
+    ...authConfig.callbacks,
+    async jwt({ token, user }) {
+      // On initial sign-in, populate token from user
+      if (user) {
+        token.userId = user.id;
+        token.roles = (user as Record<string, unknown>).roles as string[];
+        token.subscriptionTier = (user as Record<string, unknown>)
+          .subscriptionTier as string;
+      }
+
+      // On subsequent requests, refresh the tier from the database
+      // so the session stays current after a Stripe purchase
+      if (token.userId) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.userId as string },
+          select: { subscriptionTier: true },
+        });
+        if (dbUser) {
+          token.subscriptionTier = dbUser.subscriptionTier;
+        }
+      }
+
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.userId as string;
+        session.user.roles = token.roles as string[];
+        session.user.subscriptionTier = token.subscriptionTier as SubscriptionTier;
+      }
+      return session;
+    },
+  },
 });

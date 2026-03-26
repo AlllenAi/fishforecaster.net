@@ -12,6 +12,8 @@ import { WaterTypeToggle } from "./WaterTypeToggle";
 import { SpeciesFilter } from "./SpeciesFilter";
 import { DatePicker } from "./DatePicker";
 import type { ForecastResult } from "../types/scoring.types";
+import { SubscriptionGate } from "@/modules/subscription/ui/SubscriptionGate";
+import { useSubscription } from "@/modules/subscription/hooks/useSubscription";
 
 function formatToday(): string {
   const d = new Date();
@@ -57,6 +59,8 @@ export function DashboardContent() {
   const { water: waterFilter, species: speciesFilter, sort: sortBy, setWater, setSpecies, setSort } = useFilterParams();
 
   const { data: forecasts, isLoading, error } = useForecasts(date);
+  const { data: subscription } = useSubscription();
+  const isFreeTier = !subscription?.isActive;
 
   // Filter by water type
   let filtered = (forecasts ?? []).filter((f) => {
@@ -131,8 +135,13 @@ export function DashboardContent() {
         </div>
       )}
 
+      {/* Upsell for free users */}
+      {!isLoading && !error && isFreeTier && sorted.length === 0 && (
+        <SubscriptionGate message="Subscribe to unlock detailed fishing forecasts for all your favorite zones. Plans start at just $7 for 3 months." />
+      )}
+
       {/* Empty state */}
-      {!isLoading && !error && sorted.length === 0 && (
+      {!isLoading && !error && !isFreeTier && sorted.length === 0 && (
         <div className="rounded-lg border bg-card p-12 text-center">
           <p className="text-muted-foreground">
             No forecasts available for this date and filter.
