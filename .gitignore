@@ -13,6 +13,7 @@
 combined_data.txt
 # testing
 /coverage
+/test-results
 
 # next.js
 /.next/
@@ -23,6 +24,7 @@ combined_data.txt
 
 # misc
 .DS_Store
+.vscode
 *.pem
 
 # debug
