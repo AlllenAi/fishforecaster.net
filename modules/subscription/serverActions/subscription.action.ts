@@ -88,6 +88,12 @@ export const getSubscriptionStatus = withAccess(
 
     if (!subscription) return null;
 
+    // Get the user's current tier
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.userId },
+      select: { subscriptionTier: true },
+    });
+
     const now = new Date();
     const endDate = subscription.currentPeriodEnd ?? now;
     const daysRemaining = Math.max(
@@ -98,10 +104,13 @@ export const getSubscriptionStatus = withAccess(
     return {
       plan: subscription.plan,
       status: subscription.status,
+      tier: (dbUser?.subscriptionTier ?? "FREE") as "FREE" | "FRESHWATER" | "SALTWATER" | "ALL_ACCESS",
       startDate: subscription.currentPeriodStart?.toISOString() ?? "",
       endDate: endDate.toISOString(),
       isActive: subscription.status === "ACTIVE",
       daysRemaining,
+      currentPeriodEnd: subscription.currentPeriodEnd,
+      cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
     };
   }
 );

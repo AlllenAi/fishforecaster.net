@@ -3,7 +3,6 @@
 import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCheckout } from "../hooks/useCheckout";
-import type { Plan } from "../types/subscription.schema";
 
 interface UpgradePromptProps {
   waterType: "SALT" | "FRESH";
@@ -13,7 +12,7 @@ interface UpgradePromptProps {
 export function UpgradePrompt({ waterType, zoneName }: UpgradePromptProps) {
   const { mutate: checkout, isPending } = useCheckout();
 
-  const plan: Plan = waterType === "FRESH" ? "FRESHWATER" : "SALTWATER";
+  const plan = waterType === "FRESH" ? "FRESHWATER" : "SALTWATER";
   const planLabel = waterType === "FRESH" ? "Freshwater" : "Saltwater";
 
   return (
@@ -34,16 +33,16 @@ export function UpgradePrompt({ waterType, zoneName }: UpgradePromptProps) {
           variant="outline"
           size="sm"
           disabled={isPending}
-          onClick={() => checkout(plan)}
+          onClick={() => checkout({ plan })}
         >
-          {isPending ? "Loading..." : `Get ${planLabel} — $9/mo`}
+          {isPending ? "Loading..." : `Get ${planLabel} — $7/3mo`}
         </Button>
         <Button
           size="sm"
           disabled={isPending}
-          onClick={() => checkout("ALL_ACCESS")}
+          onClick={() => checkout({ plan: "ALL_ACCESS" })}
         >
-          {isPending ? "Loading..." : "All Access — $12/mo"}
+          {isPending ? "Loading..." : "All Access — $12/3mo"}
         </Button>
       </div>
     </div>

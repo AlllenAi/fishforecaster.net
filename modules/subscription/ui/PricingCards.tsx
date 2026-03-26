@@ -69,18 +69,22 @@ const plans: {
 interface PricingCardsProps {
   interactive?: boolean;
   currentPlan?: SubscriptionPlan | null;
+  currentTier?: "FREE" | "FRESHWATER" | "SALTWATER" | "ALL_ACCESS" | null;
 }
 
 export function PricingCards({
   interactive = true,
   currentPlan,
+  currentTier,
 }: PricingCardsProps) {
+  // Support both currentPlan and currentTier props
+  const activePlan = currentPlan ?? (currentTier && currentTier !== "FREE" ? currentTier as SubscriptionPlan : null);
   const { mutate: checkout, isPending, variables } = useCheckout();
 
   return (
     <div className="grid gap-6 sm:grid-cols-3">
       {plans.map((plan) => {
-        const isCurrentPlan = currentPlan === plan.plan;
+        const isCurrentPlan = activePlan === plan.plan;
         const isLoadingThis =
           isPending && variables?.plan === plan.plan;
 
