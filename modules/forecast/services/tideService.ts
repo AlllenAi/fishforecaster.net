@@ -10,6 +10,7 @@
 
 import type { TideData, TidePrediction } from "../types/weather.types";
 import { formatDateForNOAA } from "../lib/utils";
+import { fetchWithRetry } from "../lib/fetchWithRetry";
 
 const NOAA_BASE_URL =
   "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter";
@@ -52,7 +53,11 @@ export async function getTideData(
     url.searchParams.set("format", "json");
     url.searchParams.set("interval", "hilo"); // only high/low points, not every 6 min
 
-    const response = await fetch(url.toString());
+    const response = await fetchWithRetry(url.toString(), {
+      label: "NOAA Tides",
+      timeoutMs: 10_000,
+      retries: 2,
+    });
 
     if (!response.ok) {
       console.error(

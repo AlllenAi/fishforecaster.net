@@ -8,6 +8,7 @@
 // Docs: https://www.weatherapi.com/docs/
 
 import type { WeatherData, WeatherHourly } from "../types/weather.types";
+import { fetchWithRetry } from "../lib/fetchWithRetry";
 
 const WEATHER_API_BASE = "https://api.weatherapi.com/v1";
 
@@ -45,7 +46,11 @@ export async function getWeatherData(
     url.searchParams.set("aqi", "no"); // skip air quality (not needed)
     url.searchParams.set("alerts", "no"); // skip weather alerts
 
-    const response = await fetch(url.toString());
+    const response = await fetchWithRetry(url.toString(), {
+      label: "WeatherAPI",
+      timeoutMs: 10_000,
+      retries: 2,
+    });
 
     if (!response.ok) {
       const errorBody = await response.text();

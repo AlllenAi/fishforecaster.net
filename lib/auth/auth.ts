@@ -6,6 +6,7 @@ import speakeasy from "speakeasy";
 import { prisma } from "@/lib/prisma";
 import type { SubscriptionTier } from "@prisma/client";
 import { authConfig } from "./auth.config";
+import { checkLoginLimit } from "@/lib/middleware/rateLimit";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -20,6 +21,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
+
+        checkLoginLimit(credentials.email as string);
 
         const user = await prisma.user.findUnique({
           where: { email: credentials.email as string },

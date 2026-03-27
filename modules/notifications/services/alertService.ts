@@ -2,6 +2,10 @@ import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
 import { generateForecast } from "@/modules/forecast/services/forecastOrchestrator";
 import { sendBatchEmails } from "@/modules/email/services/emailService";
+import {
+  sendBatchPushNotifications,
+  type PushPayload,
+} from "./pushService";
 import { renderHighScoreAlertEmail } from "../templates/HighScoreAlertEmail";
 import { renderBiteWindowAlertEmail } from "../templates/BiteWindowAlertEmail";
 import type { ForecastResult } from "@/modules/forecast/types/scoring.types";
@@ -9,6 +13,7 @@ import type {
   HighScoreAlert,
   BiteWindowAlert,
 } from "../types/notification.schema";
+import type webpush from "web-push";
 
 const BASE_URL = process.env.NEXTAUTH_URL || "http://localhost:3000";
 
@@ -21,6 +26,7 @@ function generateToken(): string {
 export async function processAlerts(): Promise<{
   highScoreSent: number;
   biteWindowSent: number;
+  pushSent: number;
 }> {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -106,6 +112,7 @@ export async function processAlerts(): Promise<{
       highScoreThreshold: true,
       unsubscribeToken: true,
       subscriptionTier: true,
+      pushSubscription: true,
     },
   });
 
@@ -118,6 +125,10 @@ export async function processAlerts(): Promise<{
     to: string;
     subject: string;
     html: string;
+  }> = [];
+  const pushBatch: Array<{
+    subscription: webpush.PushSubscription;
+    payload: PushPayload;
   }> = [];
 
   for (const user of alertUsers) {
@@ -212,6 +223,28 @@ export async function processAlerts(): Promise<{
         });
       }
     }
+
+    // PUSH NOTIFICATIONS (in addition to email)
+    if (user.pushSubscription) {
+      const sub = user.pushSubscription as unknown as webpush.PushSubscription;
+      const matchedForecasts = forecasts.filter((f) =>
+        user.favoriteZoneIds.includes(f.forecast.zoneId)
+      );
+      const topForecast = matchedForecasts.sort(
+        (a, b) => b.forecast.score - a.forecast.score
+      )[0];
+
+      if (topForecast && topForecast.forecast.score >= user.highScoreThreshold) {
+        pushBatch.push({
+          subscription: sub,
+          payload: {
+            title: `${topForecast.forecast.zoneName}: ${topForecast.forecast.score}/100`,
+            body: `${topForecast.forecast.label} conditions — ${topForecast.forecast.captainCall.slice(0, 100)}`,
+            url: `/dashboard/zone/${topForecast.zoneSlug}`,
+          },
+        });
+      }
+    }
   }
 
   // 4. Send all alerts
@@ -229,8 +262,22 @@ export async function processAlerts(): Promise<{
     await sendBatchEmails(biteWindowBatch);
   }
 
+  // 5. Send push notifications
+  let pushSent = 0;
+  if (pushBatch.length > 0) {
+    console.warn(
+      `[Alerts] Sending push notifications to ${pushBatch.length} users`
+    );
+    try {
+      pushSent = await sendBatchPushNotifications(pushBatch);
+    } catch (err) {
+      console.error("[Alerts] Push notifications failed:", err);
+    }
+  }
+
   return {
     highScoreSent: highScoreBatch.length,
     biteWindowSent: biteWindowBatch.length,
+    pushSent,
   };
 }

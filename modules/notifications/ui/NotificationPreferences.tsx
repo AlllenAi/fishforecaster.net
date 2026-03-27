@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Zap, Clock, Gauge } from "lucide-react";
+import { Zap, Clock, Gauge, Bell } from "lucide-react";
 import { useNotificationPreferences } from "../hooks/useNotificationPreferences";
+import { usePushNotifications } from "../hooks/usePushNotifications";
 
 function Toggle({
   checked,
@@ -36,6 +37,13 @@ function Toggle({
 export function NotificationPreferences() {
   const { preferences, isLoading, updatePreferences, isUpdating } =
     useNotificationPreferences();
+  const {
+    pushState,
+    isSubscribed,
+    isLoading: pushLoading,
+    subscribe,
+    unsubscribe,
+  } = usePushNotifications();
 
   const [threshold, setThreshold] = useState<number | null>(null);
 
@@ -163,6 +171,28 @@ export function NotificationPreferences() {
             }
           />
         </div>
+
+        {/* Push Notifications */}
+        {pushState !== "unsupported" && (
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex gap-3">
+              <Bell className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
+              <div>
+                <p className="text-sm font-medium">Push Notifications</p>
+                <p className="text-xs text-muted-foreground">
+                  {pushState === "denied"
+                    ? "Notifications blocked — enable them in your browser settings"
+                    : "Get browser alerts even when the app is closed"}
+                </p>
+              </div>
+            </div>
+            <Toggle
+              checked={isSubscribed}
+              disabled={pushLoading || pushState === "denied"}
+              onToggle={() => (isSubscribed ? unsubscribe() : subscribe())}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

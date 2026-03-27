@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { withAccess } from "@/lib/middleware/withAccess";
 import type { AuthContext } from "@/lib/auth/types";
 import type { CatchStatsResult } from "../types/catchReport.schema";
+import { calculateScoreAccuracy } from "../services/catchAnalyticsService";
 
 // ─── Get Catch Stats ─────────────────────────────────────────
 
@@ -74,5 +75,18 @@ export const getZoneCatchCount = withAccess(
         caughtAt: { gte: since },
       },
     });
+  }
+);
+
+// ─── Get Forecast Accuracy for a Zone ───────────────────────
+
+export const getForecastAccuracy = withAccess(
+  async (_user: AuthContext, input: { zoneId: string; days?: number }) => {
+    const days = input.days || 30;
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    return calculateScoreAccuracy(input.zoneId, startDate, endDate);
   }
 );

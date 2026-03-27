@@ -37,7 +37,7 @@ export const FRESHWATER_WEIGHTS = {
 // Outside that range, they slow down or move to different depths.
 
 export const SPECIES_TEMP_RANGES: Record<string, { min: number; max: number; type: "SALT" | "FRESH" }> = {
-  // Saltwater species
+  // Saltwater species — Southern California
   "Bluefin Tuna": { min: 60, max: 72, type: "SALT" },
   "Yellowfin Tuna": { min: 72, max: 82, type: "SALT" },
   Albacore: { min: 58, max: 66, type: "SALT" },
@@ -45,14 +45,29 @@ export const SPECIES_TEMP_RANGES: Record<string, { min: number; max: number; typ
   "White Seabass": { min: 58, max: 68, type: "SALT" },
   Halibut: { min: 56, max: 68, type: "SALT" },
   "Calico Bass": { min: 60, max: 72, type: "SALT" },
+  // Saltwater species — Central/Northern California
+  "Chinook Salmon": { min: 50, max: 60, type: "SALT" },
+  "Lingcod": { min: 48, max: 58, type: "SALT" },
+  "Rockfish": { min: 48, max: 60, type: "SALT" },
+  "Striped Bass": { min: 55, max: 68, type: "SALT" },
+  "Dungeness Crab": { min: 46, max: 56, type: "SALT" },
+  "Pacific Mackerel": { min: 58, max: 70, type: "SALT" },
+  // Saltwater species — Baja Mexico
+  Dorado: { min: 74, max: 84, type: "SALT" },
+  Wahoo: { min: 74, max: 84, type: "SALT" },
+  Roosterfish: { min: 72, max: 82, type: "SALT" },
+  "Yellowfin Grouper": { min: 70, max: 82, type: "SALT" },
   // Freshwater species
   "Largemouth Bass": { min: 65, max: 80, type: "FRESH" },
   Bass: { min: 65, max: 80, type: "FRESH" },
   Trout: { min: 50, max: 65, type: "FRESH" },
+  "Rainbow Trout": { min: 50, max: 65, type: "FRESH" },
   Catfish: { min: 70, max: 85, type: "FRESH" },
   Crappie: { min: 60, max: 75, type: "FRESH" },
   Bluegill: { min: 65, max: 80, type: "FRESH" },
   Carp: { min: 65, max: 80, type: "FRESH" },
+  Kokanee: { min: 48, max: 58, type: "FRESH" },
+  "Smallmouth Bass": { min: 60, max: 75, type: "FRESH" },
 } as const;
 
 // ─── Moon Phase Fishing Score Boosts ────────────────────────
@@ -90,9 +105,10 @@ export function scoreToLabel(score: number): "POOR" | "FAIR" | "GOOD" | "EXCELLE
 }
 
 // ─── Tide Station IDs ───────────────────────────────────────
-// NOAA CO-OPS station IDs for Southern California
+// NOAA CO-OPS station IDs for California & beyond
 
 export const TIDE_STATIONS: Record<string, string> = {
+  // Southern California
   "San Diego": "9410170",
   "La Jolla": "9410230",
   "Newport Beach": "9410580",
@@ -100,12 +116,22 @@ export const TIDE_STATIONS: Record<string, string> = {
   "Avalon (Catalina)": "9410079",
   "Santa Barbara": "9411340",
   "Port Hueneme": "9411399",
+  // Central California
+  "Morro Bay": "9412110",
+  "Monterey": "9413450",
+  "Santa Cruz": "9413745",
+  // Northern California
+  "San Francisco": "9414290",
+  "Bodega Bay": "9415020",
+  "Fort Bragg": "9416841",
+  "Eureka": "9418767",
 };
 
 // ─── NDBC Buoy IDs ──────────────────────────────────────────
-// National Data Buoy Center buoys off the SoCal coast
+// National Data Buoy Center buoys off the California coast
 
 export const NDBC_BUOYS: Record<string, string> = {
+  // Southern California
   "Point Loma South": "46232",
   "Oceanside Offshore": "46224",
   "Dana Point": "46223",
@@ -114,6 +140,15 @@ export const NDBC_BUOYS: Record<string, string> = {
   "Santa Rosa Island": "46069",
   "East Santa Barbara": "46053",
   "West Santa Barbara": "46054",
+  // Central California
+  "Diablo Canyon": "46215",
+  "Monterey Canyon": "46042",
+  "Cabrillo Point": "46240",
+  // Northern California
+  "San Francisco Bar": "46026",
+  "Bodega Bay Offshore": "46013",
+  "Point Arena": "46014",
+  "Cape Mendocino": "46022",
 };
 
 // ─── Wind Scoring Thresholds (knots) ────────────────────────

@@ -3,6 +3,7 @@
 import { withPermission } from "@/lib/middleware/withPermission";
 import { AuthContext } from "@/lib/auth/types";
 import { prisma } from "@/lib/prisma";
+import { logAction, getAuditLogs } from "../services/auditService";
 import {
   adminUserQuerySchema,
   adminReportQuerySchema,
@@ -107,12 +108,25 @@ export const getAdminUsers = withPermission("admin")(
 );
 
 export const updateUserRole = withPermission("admin")(
-  async (_user: AuthContext, userId: string, roles: string[]) => {
+  async (admin: AuthContext, userId: string, roles: string[]) => {
+    const before = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { roles: true },
+    });
+
     const user = await prisma.user.update({
       where: { id: userId },
       data: { roles },
       select: { id: true, email: true, roles: true },
     });
+
+    await logAction(admin, {
+      action: "user.role.update",
+      targetType: "user",
+      targetId: userId,
+      details: { oldRoles: before?.roles, newRoles: roles, email: user.email },
+    });
+
     return { data: user, success: true };
   }
 );
@@ -165,32 +179,61 @@ export const getAdminReports = withPermission("admin")(
 );
 
 export const verifyCatchReport = withPermission("admin")(
-  async (_user: AuthContext, reportId: string) => {
+  async (admin: AuthContext, reportId: string) => {
     await prisma.catchReport.update({
       where: { id: reportId },
       data: { isVerified: true },
     });
+
+    await logAction(admin, {
+      action: "report.verify",
+      targetType: "catchReport",
+      targetId: reportId,
+    });
+
     return { success: true };
   }
 );
 
 export const deleteCatchReport = withPermission("admin")(
-  async (_user: AuthContext, reportId: string) => {
+  async (admin: AuthContext, reportId: string) => {
     await prisma.catchReport.update({
       where: { id: reportId },
       data: { isDeleted: true },
     });
+
+    await logAction(admin, {
+      action: "report.delete",
+      targetType: "catchReport",
+      targetId: reportId,
+    });
+
     return { success: true };
   }
 );
 
 export const restoreCatchReport = withPermission("admin")(
-  async (_user: AuthContext, reportId: string) => {
+  async (admin: AuthContext, reportId: string) => {
     await prisma.catchReport.update({
       where: { id: reportId },
       data: { isDeleted: false },
     });
+
+    await logAction(admin, {
+      action: "report.restore",
+      targetType: "catchReport",
+      targetId: reportId,
+    });
+
     return { success: true };
+  }
+);
+
+// ─── Audit Log ───────────────────────────────────────────
+
+export const getAdminAuditLogs = withPermission("admin")(
+  async (_user: AuthContext, query: { page?: number; limit?: number }) => {
+    return getAuditLogs({ page: query.page, limit: query.limit });
   }
 );
 

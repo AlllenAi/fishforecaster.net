@@ -2,7 +2,7 @@
 //
 // Run this with: yarn db:seed
 //
-// This loads all 13 fishing zones (8 saltwater, 5 freshwater) into
+// This loads all fishing zones (saltwater + freshwater) into
 // your MongoDB database. It uses "upsert" which means:
 //   - If the zone doesn't exist → create it
 //   - If it already exists (same slug) → update it
@@ -103,7 +103,124 @@ const ZONES = [
     species: ["White Seabass", "Halibut", "Calico Bass"],
   },
 
-  // ─── Freshwater Zones ───────────────────────────────────
+  // ─── Central California Saltwater ──────────────────────
+  {
+    name: "Morro Bay",
+    slug: "morro-bay",
+    waterType: "SALT" as const,
+    lat: 35.37,
+    lon: -120.87,
+    radiusMiles: 15,
+    tideStationId: "9412110",
+    ndbcBuoyId: "46215",
+    species: ["Rockfish", "Lingcod", "Halibut", "White Seabass"],
+  },
+  {
+    name: "Monterey Bay",
+    slug: "monterey-bay",
+    waterType: "SALT" as const,
+    lat: 36.6,
+    lon: -122.0,
+    radiusMiles: 20,
+    tideStationId: "9413450",
+    ndbcBuoyId: "46042",
+    species: ["Chinook Salmon", "Rockfish", "Lingcod", "Halibut", "Albacore"],
+  },
+  {
+    name: "Santa Cruz",
+    slug: "santa-cruz",
+    waterType: "SALT" as const,
+    lat: 36.95,
+    lon: -122.02,
+    radiusMiles: 15,
+    tideStationId: "9413745",
+    ndbcBuoyId: "46240",
+    species: ["Rockfish", "Lingcod", "Chinook Salmon", "Pacific Mackerel"],
+  },
+
+  // ─── Northern California Saltwater ────────────────────
+  {
+    name: "San Francisco Bay",
+    slug: "san-francisco-bay",
+    waterType: "SALT" as const,
+    lat: 37.78,
+    lon: -122.48,
+    radiusMiles: 15,
+    tideStationId: "9414290",
+    ndbcBuoyId: "46026",
+    species: ["Striped Bass", "Halibut", "Chinook Salmon", "Rockfish"],
+  },
+  {
+    name: "Bodega Bay",
+    slug: "bodega-bay",
+    waterType: "SALT" as const,
+    lat: 38.33,
+    lon: -123.05,
+    radiusMiles: 15,
+    tideStationId: "9415020",
+    ndbcBuoyId: "46013",
+    species: ["Chinook Salmon", "Rockfish", "Lingcod", "Dungeness Crab"],
+  },
+  {
+    name: "Fort Bragg Offshore",
+    slug: "fort-bragg-offshore",
+    waterType: "SALT" as const,
+    lat: 39.45,
+    lon: -123.82,
+    radiusMiles: 20,
+    tideStationId: "9416841",
+    ndbcBuoyId: "46014",
+    species: ["Chinook Salmon", "Rockfish", "Lingcod", "Albacore"],
+  },
+  {
+    name: "Eureka Offshore",
+    slug: "eureka-offshore",
+    waterType: "SALT" as const,
+    lat: 40.77,
+    lon: -124.25,
+    radiusMiles: 20,
+    tideStationId: "9418767",
+    ndbcBuoyId: "46022",
+    species: ["Chinook Salmon", "Rockfish", "Lingcod", "Dungeness Crab"],
+  },
+
+  // ─── Baja Mexico Saltwater ────────────────────────────
+  // (No NOAA tide/buoy data — weather-only forecasts, lower confidence)
+  {
+    name: "Ensenada",
+    slug: "ensenada",
+    waterType: "SALT" as const,
+    lat: 31.85,
+    lon: -116.63,
+    radiusMiles: 20,
+    tideStationId: null,
+    ndbcBuoyId: null,
+    species: ["Yellowtail", "Calico Bass", "White Seabass", "Halibut"],
+  },
+  {
+    name: "Cabo San Lucas",
+    slug: "cabo-san-lucas",
+    waterType: "SALT" as const,
+    lat: 22.89,
+    lon: -109.92,
+    radiusMiles: 25,
+    tideStationId: null,
+    ndbcBuoyId: null,
+    species: ["Dorado", "Yellowfin Tuna", "Wahoo", "Roosterfish"],
+  },
+  {
+    name: "East Cape Baja",
+    slug: "east-cape-baja",
+    waterType: "SALT" as const,
+    lat: 23.38,
+    lon: -109.43,
+    radiusMiles: 20,
+    tideStationId: null,
+    ndbcBuoyId: null,
+    species: ["Dorado", "Roosterfish", "Yellowfin Tuna", "Wahoo"],
+  },
+
+  // ─── Freshwater Zones — Southern California ───────────
   {
     name: "Lake Perris",
     slug: "lake-perris",
@@ -158,6 +275,63 @@ const ZONES = [
     tideStationId: null,
     ndbcBuoyId: null,
     species: ["Trout", "Bass", "Catfish", "Crappie", "Bluegill"],
+  },
+
+  // ─── Freshwater Zones — Central/Northern California ───
+  {
+    name: "Clear Lake",
+    slug: "clear-lake",
+    waterType: "FRESH" as const,
+    lat: 39.02,
+    lon: -122.78,
+    radiusMiles: 10,
+    tideStationId: null,
+    ndbcBuoyId: null,
+    species: ["Largemouth Bass", "Catfish", "Crappie", "Bluegill", "Carp"],
+  },
+  {
+    name: "Lake Berryessa",
+    slug: "lake-berryessa",
+    waterType: "FRESH" as const,
+    lat: 38.6,
+    lon: -122.23,
+    radiusMiles: 8,
+    tideStationId: null,
+    ndbcBuoyId: null,
+    species: ["Largemouth Bass", "Smallmouth Bass", "Rainbow Trout", "Catfish", "Kokanee"],
+  },
+  {
+    name: "Lake Shasta",
+    slug: "lake-shasta",
+    waterType: "FRESH" as const,
+    lat: 40.78,
+    lon: -122.35,
+    radiusMiles: 15,
+    tideStationId: null,
+    ndbcBuoyId: null,
+    species: ["Rainbow Trout", "Largemouth Bass", "Smallmouth Bass", "Catfish", "Crappie"],
+  },
+  {
+    name: "Lake Oroville",
+    slug: "lake-oroville",
+    waterType: "FRESH" as const,
+    lat: 39.55,
+    lon: -121.47,
+    radiusMiles: 10,
+    tideStationId: null,
+    ndbcBuoyId: null,
+    species: ["Largemouth Bass", "Smallmouth Bass", "Rainbow Trout", "Chinook Salmon", "Catfish"],
+  },
+  {
+    name: "Don Pedro Reservoir",
+    slug: "don-pedro-reservoir",
+    waterType: "FRESH" as const,
+    lat: 37.71,
+    lon: -120.42,
+    radiusMiles: 8,
+    tideStationId: null,
+    ndbcBuoyId: null,
+    species: ["Largemouth Bass", "Kokanee", "Rainbow Trout", "Catfish", "Crappie"],
   },
 ];
 

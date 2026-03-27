@@ -8,6 +8,11 @@ import { ConflictError, ValidationError } from "@/lib/auth/types";
 import { sendWelcomeEmail } from "@/modules/email/serverActions/email.action";
 import { sendEmail } from "@/modules/email/services/emailService";
 import speakeasy from "speakeasy";
+import {
+  checkRegisterLimit,
+  checkPasswordResetLimit,
+  checkTwoFactorLimit,
+} from "@/lib/middleware/rateLimit";
 
 export async function register(input: RegisterInput) {
   const parsed = registerSchema.safeParse(input);
@@ -16,6 +21,8 @@ export async function register(input: RegisterInput) {
   }
 
   const { name, email, password } = parsed.data;
+
+  checkRegisterLimit(email);
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
@@ -45,6 +52,8 @@ export async function register(input: RegisterInput) {
 export async function setupTwoFactor(email: string) {
   if (!email) throw new Error("Email is required");
 
+  checkTwoFactorLimit(email);
+
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) throw new Error("User not found");
 
@@ -70,6 +79,8 @@ export async function verifyTwoFactorCode(email: string, code: string) {
     return { success: false, message: "Email and 2FA code are required" };
   }
 
+  checkTwoFactorLimit(email);
+
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user || !user.twoFactorEnabled || !user.twoFactorSecret) {
     return { success: false, message: "Two-factor not enabled for this account" };
@@ -93,6 +104,8 @@ export async function sendPasswordResetRequest(email: string) {
   if (!email) {
     return { success: false, message: "Email is required" };
   }
+
+  checkPasswordResetLimit(email);
 
   const user = await prisma.user.findUnique({ where: { email } });
   const token = crypto.randomBytes(48).toString("hex");

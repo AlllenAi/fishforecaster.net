@@ -10,6 +10,7 @@ import { ConditionsGrid } from "./ConditionsGrid";
 import { SpeciesScoreRow } from "./SpeciesScoreRow";
 import { CaptainCall } from "./CaptainCall";
 import { DatePicker } from "./DatePicker";
+import { ForecastAccuracy } from "@/modules/catchReports/ui/ForecastAccuracy";
 import Link from "next/link";
 import { ArrowLeft, Shield } from "lucide-react";
 
@@ -124,6 +125,13 @@ export function ZoneDetailContent({ slug }: { slug: string }) {
               ))}
             </div>
           </section>
+
+          {/* Forecast Accuracy */}
+          {zone && (
+            <section>
+              <ForecastAccuracy zoneId={zone.id} />
+            </section>
+          )}
         </>
       )}
     </div>

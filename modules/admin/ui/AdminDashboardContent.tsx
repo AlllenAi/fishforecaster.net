@@ -3,7 +3,7 @@
 import { useAdminStats } from "../hooks/useAdminData";
 import { AdminStatsCards, TierBreakdown } from "./AdminStatsCards";
 import Link from "next/link";
-import { Users, FileText, Mail, ArrowRight } from "lucide-react";
+import { Users, FileText, Mail, ScrollText, ArrowRight } from "lucide-react";
 
 function QuickLink({
   href,
@@ -94,6 +94,11 @@ export function AdminDashboardContent() {
               icon={<Mail className="h-5 w-5" />}
               label="View Leads"
               count={stats.totalLeads}
+            />
+            <QuickLink
+              href="/dashboard/admin/audit"
+              icon={<ScrollText className="h-5 w-5" />}
+              label="Audit Log"
             />
           </div>
         </div>

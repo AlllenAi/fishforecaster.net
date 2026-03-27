@@ -199,6 +199,22 @@ model Lead {
   @@map("leads")
 }
 
+model AuditLog {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  actorId    String   @db.ObjectId
+  actorEmail String
+  action     String   // e.g. "user.role.update", "report.verify"
+  targetType String   // e.g. "user", "catchReport"
+  targetId   String   // ID of the affected record
+  details    Json?    // Additional context (e.g. { oldRoles, newRoles })
+  createdAt  DateTime @default(now())
+
+  @@index([actorId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
 model Subscription {
   id                   String             @id @default(auto()) @map("_id") @db.ObjectId
   userId               String             @unique @db.ObjectId

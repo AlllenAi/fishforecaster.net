@@ -7,6 +7,7 @@ import {
   getAdminUsers,
   getAdminReports,
   getAdminLeads,
+  getAdminAuditLogs,
   updateUserRole,
   verifyCatchReport,
   deleteCatchReport,
@@ -99,5 +100,14 @@ export function useAdminLeads(query: { page?: number; limit?: number }) {
   return useQuery({
     queryKey: ["admin", "leads", query],
     queryFn: () => getAdminLeads(query),
+  });
+}
+
+// ─── Audit Logs ─────────────────────────────────────────
+
+export function useAuditLogs(query: { page?: number; limit?: number }) {
+  return useQuery({
+    queryKey: ["admin", "audit-logs", query],
+    queryFn: () => getAdminAuditLogs(query),
   });
 }

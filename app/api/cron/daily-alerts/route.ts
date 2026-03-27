@@ -20,13 +20,14 @@ export async function GET(req: NextRequest) {
     const result = await processAlerts();
 
     console.warn(
-      `[Cron] Daily alerts: ${result.highScoreSent} high-score, ${result.biteWindowSent} bite-window emails sent`
+      `[Cron] Daily alerts: ${result.highScoreSent} high-score, ${result.biteWindowSent} bite-window emails, ${result.pushSent} push sent`
     );
 
     return NextResponse.json({
       success: true,
       highScoreSent: result.highScoreSent,
       biteWindowSent: result.biteWindowSent,
+      pushSent: result.pushSent,
     });
   } catch (err) {
     console.error("[Cron] Daily alerts failed:", err);

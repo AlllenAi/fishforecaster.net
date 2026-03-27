@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { setupTwoFactor, disableTwoFactor, verifyTwoFactorCode } from "@/modules/auth/serverActions/auth.action";
+import { RateLimitError } from "@/lib/auth/types";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -53,6 +54,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: false, message: "Unsupported action" }, { status: 400 });
   } catch (error) {
+    if (error instanceof RateLimitError) {
+      return NextResponse.json({ success: false, message: error.message }, { status: 429 });
+    }
     return NextResponse.json({ success: false, message: (error as Error).message }, { status: 500 });
   }
 }

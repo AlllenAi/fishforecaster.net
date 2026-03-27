@@ -12,6 +12,7 @@
 
 import type { BuoyData, BuoyObservation } from "../types/weather.types";
 import { celsiusToFahrenheit, msToKnots } from "../lib/utils";
+import { fetchWithRetry } from "../lib/fetchWithRetry";
 
 const NDBC_BASE_URL = "https://www.ndbc.noaa.gov/data/realtime2";
 
@@ -31,7 +32,11 @@ export async function getBuoyData(buoyId: string): Promise<BuoyData | null> {
   try {
     // NDBC serves a plain text file for each buoy
     const url = `${NDBC_BASE_URL}/${buoyId}.txt`;
-    const response = await fetch(url);
+    const response = await fetchWithRetry(url, {
+      label: "NDBC Buoy",
+      timeoutMs: 10_000,
+      retries: 2,
+    });
 
     if (!response.ok) {
       console.error(`NDBC API error for buoy ${buoyId}: ${response.status}`);

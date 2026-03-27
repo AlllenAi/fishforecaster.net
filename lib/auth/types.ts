@@ -42,3 +42,10 @@ export class NotFoundError extends Error {
     this.name = "NotFoundError";
   }
 }
+
+export class RateLimitError extends Error {
+  constructor(message: string = "Too many requests") {
+    super(message);
+    this.name = "RateLimitError";
+  }
+}
