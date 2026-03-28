@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { QueryProvider } from "@/components/query-provider";
 import { Toaster } from "sonner";
+import { CookieConsentBanner } from "@/modules/privacy/ui/CookieConsentBanner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,6 +37,7 @@ export default async function RootLayout({
           <QueryProvider>
             {children}
             <Toaster richColors position="top-right" />
+            <CookieConsentBanner />
           </QueryProvider>
         </ThemeProvider>
       </body>

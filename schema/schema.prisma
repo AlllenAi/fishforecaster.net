@@ -233,3 +233,18 @@ model Subscription {
 
   @@map("subscriptions")
 }
+
+model Consent {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String?  @db.ObjectId
+  type      String   // "terms" | "privacy" | "cookies"
+  version   String   // e.g. "1.0"
+  granted   Boolean  @default(true)
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([type])
+  @@map("consents")
+}

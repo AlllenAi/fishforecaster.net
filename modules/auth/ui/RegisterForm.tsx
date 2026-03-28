@@ -15,6 +15,12 @@ export function RegisterForm() {
     setErrors({});
 
     const formData = new FormData(e.currentTarget);
+    const agreedToTerms = formData.get("agreedToTerms") === "on";
+    if (!agreedToTerms) {
+      setErrors({ agreedToTerms: "You must agree to the Privacy Policy and Terms of Service" });
+      return;
+    }
+
     const data = {
       name: formData.get("name") as string,
       email: formData.get("email") as string,
@@ -105,6 +111,28 @@ export function RegisterForm() {
           <p className="mt-1 text-xs text-destructive">{errors.confirmPassword}</p>
         )}
       </div>
+
+      <div className="flex items-start gap-2">
+        <input
+          id="agreedToTerms"
+          name="agreedToTerms"
+          type="checkbox"
+          className="mt-1 h-4 w-4 rounded border-border"
+        />
+        <label htmlFor="agreedToTerms" className="text-sm text-muted-foreground">
+          I agree to the{" "}
+          <Link href="/privacy" target="_blank" className="text-primary underline hover:no-underline">
+            Privacy Policy
+          </Link>{" "}
+          and{" "}
+          <Link href="/terms" target="_blank" className="text-primary underline hover:no-underline">
+            Terms of Service
+          </Link>
+        </label>
+      </div>
+      {errors.agreedToTerms && (
+        <p className="text-xs text-destructive">{errors.agreedToTerms}</p>
+      )}
 
       <Button type="submit" disabled={isPending} className="w-full">
         {isPending ? "Creating account..." : "Create Account"}

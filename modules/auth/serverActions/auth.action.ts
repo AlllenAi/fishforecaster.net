@@ -13,6 +13,10 @@ import {
   checkPasswordResetLimit,
   checkTwoFactorLimit,
 } from "@/lib/middleware/rateLimit";
+import {
+  PRIVACY_POLICY_VERSION,
+  TERMS_VERSION,
+} from "@/modules/privacy/types/privacy.schema";
 
 export async function register(input: RegisterInput) {
   const parsed = registerSchema.safeParse(input);
@@ -39,6 +43,14 @@ export async function register(input: RegisterInput) {
       roles: ["user"],
       subscriptionTier: "FREE",
     },
+  });
+
+  // Record GDPR consent (terms + privacy policy acceptance)
+  await prisma.consent.createMany({
+    data: [
+      { userId: user.id, type: "terms", version: TERMS_VERSION, granted: true },
+      { userId: user.id, type: "privacy", version: PRIVACY_POLICY_VERSION, granted: true },
+    ],
   });
 
   // Send welcome email (fire and forget)

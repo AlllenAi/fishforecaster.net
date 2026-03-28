@@ -31,10 +31,10 @@ export function FooterCTA() {
             <span>&copy; 2026 The Fish Forecaster. All rights reserved.</span>
           </div>
           <div className="flex gap-6 text-sm text-muted-foreground">
-            <Link href="#" className="hover:text-foreground transition-colors">
+            <Link href="/privacy" className="hover:text-foreground transition-colors">
               Privacy Policy
             </Link>
-            <Link href="#" className="hover:text-foreground transition-colors">
+            <Link href="/terms" className="hover:text-foreground transition-colors">
               Terms of Service
             </Link>
           </div>
