@@ -26,7 +26,7 @@ export async function register(input: RegisterInput) {
 
   const { name, email, password } = parsed.data;
 
-  checkRegisterLimit(email);
+  await checkRegisterLimit(email);
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
@@ -64,7 +64,7 @@ export async function register(input: RegisterInput) {
 export async function setupTwoFactor(email: string) {
   if (!email) throw new Error("Email is required");
 
-  checkTwoFactorLimit(email);
+  await checkTwoFactorLimit(email);
 
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) throw new Error("User not found");
@@ -91,7 +91,7 @@ export async function verifyTwoFactorCode(email: string, code: string) {
     return { success: false, message: "Email and 2FA code are required" };
   }
 
-  checkTwoFactorLimit(email);
+  await checkTwoFactorLimit(email);
 
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user || !user.twoFactorEnabled || !user.twoFactorSecret) {
@@ -117,7 +117,7 @@ export async function sendPasswordResetRequest(email: string) {
     return { success: false, message: "Email is required" };
   }
 
-  checkPasswordResetLimit(email);
+  await checkPasswordResetLimit(email);
 
   const user = await prisma.user.findUnique({ where: { email } });
   const token = crypto.randomBytes(48).toString("hex");
