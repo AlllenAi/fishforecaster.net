@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // ─── Hoisted mocks ──────────────────────────────────────────
-const { mockPrisma } = vi.hoisted(() => ({
+const { mockPrisma, mockStripe } = vi.hoisted(() => ({
   mockPrisma: {
     user: {
       findUnique: vi.fn(),
@@ -19,10 +19,19 @@ const { mockPrisma } = vi.hoisted(() => ({
       findMany: vi.fn(),
     },
   },
+  mockStripe: {
+    charges: {
+      list: vi.fn().mockResolvedValue({ data: [] }),
+    },
+  },
 }));
 
 vi.mock("@/lib/prisma", () => ({
   prisma: mockPrisma,
+}));
+
+vi.mock("@/lib/stripe", () => ({
+  stripe: mockStripe,
 }));
 
 import { gatherUserData } from "@/modules/privacy/services/dataExportService";
@@ -68,6 +77,7 @@ const mockCatchReports = [
 const mockSubscription = {
   plan: "FRESHWATER",
   status: "ACTIVE",
+  stripeCustomerId: "cus_test123",
   currentPeriodStart: new Date(),
   currentPeriodEnd: new Date(),
   createdAt: new Date(),
@@ -106,6 +116,7 @@ describe("gatherUserData", () => {
     expect(result).toHaveProperty("subscription");
     expect(result).toHaveProperty("consents");
     expect(result).toHaveProperty("auditLogs");
+    expect(result).toHaveProperty("stripePayments");
   });
 
   it("includes exportDate as ISO string", async () => {

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { stripe } from "@/lib/stripe";
 
 export async function gatherUserData(userId: string) {
   const [user, catchReports, subscription, consents, auditLogs] =
@@ -42,6 +43,7 @@ export async function gatherUserData(userId: string) {
         select: {
           plan: true,
           status: true,
+          stripeCustomerId: true,
           currentPeriodStart: true,
           currentPeriodEnd: true,
           createdAt: true,
@@ -68,6 +70,35 @@ export async function gatherUserData(userId: string) {
       }),
     ]);
 
+  // Fetch Stripe payment history if customer exists
+  let stripePayments: {
+    id: string;
+    amount: number;
+    currency: string;
+    status: string;
+    description: string | null;
+    created: number;
+  }[] = [];
+
+  if (subscription?.stripeCustomerId) {
+    try {
+      const charges = await stripe.charges.list({
+        customer: subscription.stripeCustomerId,
+        limit: 100,
+      });
+      stripePayments = charges.data.map((charge) => ({
+        id: charge.id,
+        amount: charge.amount,
+        currency: charge.currency,
+        status: charge.status,
+        description: charge.description,
+        created: charge.created,
+      }));
+    } catch {
+      // If Stripe is unreachable, still export local data
+    }
+  }
+
   return {
     exportDate: new Date().toISOString(),
     user,
@@ -75,5 +106,6 @@ export async function gatherUserData(userId: string) {
     subscription,
     consents,
     auditLogs,
+    stripePayments,
   };
 }

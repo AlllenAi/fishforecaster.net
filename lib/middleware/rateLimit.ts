@@ -1,87 +1,113 @@
-// ─── Rate Limiter (Upstash Redis with in-memory fallback) ────
-// Uses Upstash Redis in production for distributed rate limiting
-// across serverless functions. Falls back to in-memory for local dev.
+// ─── Redis-backed Sliding Window Rate Limiter ───────────────
+// Uses Upstash Redis for rate limiting that works across all
+// Vercel serverless instances. Falls back to a simple in-memory
+// Map when Redis env vars are not set (local development).
 
 import { RateLimitError } from "@/lib/auth/types";
-import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
 
-// ─── Upstash Redis client (if configured) ─────────────────
+// ─── Types ──────────────────────────────────────────────────
 
-const redis =
-  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
-    ? new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL,
-        token: process.env.UPSTASH_REDIS_REST_TOKEN,
-      })
-    : null;
-
-function createLimiter(maxAttempts: number, windowSeconds: number) {
-  if (redis) {
-    return new Ratelimit({
-      redis,
-      limiter: Ratelimit.slidingWindow(maxAttempts, `${windowSeconds} s`),
-      analytics: true,
-    });
-  }
-  return null;
+interface RateLimitResult {
+  success: boolean;
+  reset: number; // epoch ms
 }
 
-// ─── In-memory fallback for local dev ─────────────────────
-
-interface RateLimitEntry {
-  count: number;
-  resetAt: number;
+interface Limiter {
+  limit(key: string): Promise<RateLimitResult>;
 }
 
-const store = new Map<string, RateLimitEntry>();
+// ─── In-Memory Fallback (local dev only) ────────────────────
 
-if (typeof setInterval !== "undefined") {
-  setInterval(() => {
-    const now = Date.now();
-    for (const [key, entry] of store) {
-      if (now >= entry.resetAt) store.delete(key);
-    }
-  }, 60_000).unref();
+function createMemoryLimiter(
+  maxAttempts: number,
+  windowMs: number
+): Limiter {
+  const store = new Map<string, { count: number; resetAt: number }>();
+
+  return {
+    async limit(key: string): Promise<RateLimitResult> {
+      const now = Date.now();
+      const entry = store.get(key);
+
+      if (!entry || now >= entry.resetAt) {
+        store.set(key, { count: 1, resetAt: now + windowMs });
+        return { success: true, reset: now + windowMs };
+      }
+
+      if (entry.count >= maxAttempts) {
+        return { success: false, reset: entry.resetAt };
+      }
+
+      entry.count++;
+      return { success: true, reset: entry.resetAt };
+    },
+  };
 }
 
-function checkRateLimitLocal(
-  key: string,
+// ─── Redis Limiter (production) ─────────────────────────────
+
+function createRedisLimiter(
   maxAttempts: number,
   windowSeconds: number
-): void {
-  const now = Date.now();
-  const entry = store.get(key);
+): Limiter {
+  // Dynamic import avoids loading Upstash when not configured
+  let limiterInstance: Limiter | null = null;
 
-  if (!entry || now >= entry.resetAt) {
-    store.set(key, { count: 1, resetAt: now + windowSeconds * 1000 });
-    return;
-  }
+  return {
+    async limit(key: string): Promise<RateLimitResult> {
+      if (!limiterInstance) {
+        const { Ratelimit } = await import("@upstash/ratelimit");
+        const { Redis } = await import("@upstash/redis");
 
-  if (entry.count >= maxAttempts) {
-    const retryAfter = Math.ceil((entry.resetAt - now) / 1000);
-    throw new RateLimitError(
-      `Too many requests. Please try again in ${retryAfter} seconds.`
-    );
-  }
+        const redis = new Redis({
+          url: process.env.UPSTASH_REDIS_REST_URL!,
+          token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+        });
 
-  entry.count++;
+        const rl = new Ratelimit({
+          redis,
+          limiter: Ratelimit.slidingWindow(maxAttempts, `${windowSeconds} s`),
+          analytics: true,
+          prefix: "ratelimit",
+        });
+
+        limiterInstance = {
+          async limit(k: string) {
+            const res = await rl.limit(k);
+            return { success: res.success, reset: res.reset };
+          },
+        };
+      }
+
+      return limiterInstance.limit(key);
+    },
+  };
 }
 
-// ─── Core check function ──────────────────────────────────
+// ─── Limiter Factory ────────────────────────────────────────
 
-async function checkRateLimit(
-  key: string,
-  maxAttempts: number,
-  windowSeconds: number
-): Promise<void> {
-  if (!redis) {
-    checkRateLimitLocal(key, maxAttempts, windowSeconds);
-    return;
+const hasRedis =
+  !!process.env.UPSTASH_REDIS_REST_URL &&
+  !!process.env.UPSTASH_REDIS_REST_TOKEN;
+
+function createLimiter(maxAttempts: number, windowSeconds: number): Limiter {
+  if (hasRedis) {
+    return createRedisLimiter(maxAttempts, windowSeconds);
   }
+  return createMemoryLimiter(maxAttempts, windowSeconds * 1000);
+}
 
-  const limiter = createLimiter(maxAttempts, windowSeconds);
-  const { success, reset } = await limiter!.limit(key);
+// ─── Pre-configured limiters ────────────────────────────────
+
+const loginLimiter = createLimiter(5, 60);
+const registerLimiter = createLimiter(3, 60);
+const passwordResetLimiter = createLimiter(3, 60);
+const twoFactorLimiter = createLimiter(5, 60);
+
+// ─── Core check function ────────────────────────────────────
+
+async function checkLimit(limiter: Limiter, key: string): Promise<void> {
+  const { success, reset } = await limiter.limit(key);
 
   if (!success) {
     const retryAfter = Math.ceil((reset - Date.now()) / 1000);
@@ -91,24 +117,24 @@ async function checkRateLimit(
   }
 }
 
-// ─── Pre-configured limiters for common auth actions ──────
+// ─── Exported limiters ──────────────────────────────────────
 
 /** 5 login attempts per 60 seconds per key */
 export async function checkLoginLimit(key: string) {
-  await checkRateLimit(`login:${key}`, 5, 60);
+  await checkLimit(loginLimiter, `login:${key}`);
 }
 
 /** 3 registration attempts per 60 seconds per key */
 export async function checkRegisterLimit(key: string) {
-  await checkRateLimit(`register:${key}`, 3, 60);
+  await checkLimit(registerLimiter, `register:${key}`);
 }
 
 /** 3 password reset requests per 60 seconds per key */
 export async function checkPasswordResetLimit(key: string) {
-  await checkRateLimit(`password-reset:${key}`, 3, 60);
+  await checkLimit(passwordResetLimiter, `password-reset:${key}`);
 }
 
 /** 5 two-factor verification attempts per 60 seconds per key */
 export async function checkTwoFactorLimit(key: string) {
-  await checkRateLimit(`2fa:${key}`, 5, 60);
+  await checkLimit(twoFactorLimiter, `2fa:${key}`);
 }
