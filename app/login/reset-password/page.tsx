@@ -55,7 +55,7 @@ export default function ResetPasswordPage({ searchParams }: { searchParams: Prom
 
         <div className="border rounded-lg p-6 bg-card shadow-sm">
           <form onSubmit={handleSubmit} className="space-y-4">
-            <input type="hidden" name="token" value={token} />
+            <input type="hidden" name="token" value={token ?? ""} />
             <div>
               <label htmlFor="password" className="block text-sm font-medium mb-1">
                 New Password
