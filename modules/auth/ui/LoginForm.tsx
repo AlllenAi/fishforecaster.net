@@ -4,19 +4,16 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useLogin } from "../hooks/useLogin";
 import { loginSchema } from "../types/auth.schema";
+import { checkTwoFactorRequired } from "../serverActions/auth.action";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-
-const twoFactorUser = (email: string) =>
-  email.toLowerCase().endsWith("@2fa.test") || email.toLowerCase() === "2fa@example.com";
 
 export function LoginForm() {
   const { mutate: login, isPending } = useLogin();
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [rememberMe, setRememberMe] = useState(false);
   const [twoFactorRequired, setTwoFactorRequired] = useState(false);
   const [twoFactorCode, setTwoFactorCode] = useState("");
-  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [_failedAttempts, setFailedAttempts] = useState(0);
   const [lockoutSeconds, setLockoutSeconds] = useState(0);
 
   useEffect(() => {
@@ -28,7 +25,7 @@ export function LoginForm() {
     return () => clearInterval(timer);
   }, [lockoutSeconds]);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
 
@@ -41,7 +38,6 @@ export function LoginForm() {
     const data = {
       email: (formData.get("email") as string)?.trim(),
       password: formData.get("password") as string,
-      rememberMe,
       twoFactorCode: twoFactorRequired ? twoFactorCode.trim() : undefined,
     };
 
@@ -56,10 +52,17 @@ export function LoginForm() {
       return;
     }
 
-    if (!twoFactorRequired && twoFactorUser(parsed.data.email)) {
-      setTwoFactorRequired(true);
-      toast("Two-factor authentication required for this account. Please enter your 6-digit code.");
-      return;
+    if (!twoFactorRequired) {
+      try {
+        const needs2FA = await checkTwoFactorRequired(parsed.data.email);
+        if (needs2FA) {
+          setTwoFactorRequired(true);
+          toast("Two-factor authentication required. Please enter your 6-digit code.");
+          return;
+        }
+      } catch {
+        // If the check fails, proceed with login and let the server handle it
+      }
     }
 
     login(parsed.data, {
@@ -132,20 +135,6 @@ export function LoginForm() {
         </div>
       )}
 
-      <div className="flex items-center gap-2">
-        <input
-          id="rememberMe"
-          name="rememberMe"
-          type="checkbox"
-          checked={rememberMe}
-          onChange={(e) => setRememberMe(e.target.checked)}
-          className="h-4 w-4 rounded border border-border text-primary focus:ring-primary"
-        />
-        <label htmlFor="rememberMe" className="text-sm">
-          Remember me
-        </label>
-      </div>
-
       {lockoutSeconds > 0 && (
         <p className="text-sm text-destructive">Too many attempts. Try again in {lockoutSeconds} seconds</p>
       )}
@@ -154,12 +143,9 @@ export function LoginForm() {
         {isPending ? "Signing in..." : "Sign In"}
       </Button>
 
-      <div className="flex justify-between text-sm text-muted-foreground">
+      <div className="text-center text-sm text-muted-foreground">
         <Link href="/login/forgot-password" className="text-primary underline hover:no-underline">
           Forgot Password?
-        </Link>
-        <Link href="/login/2fa" className="text-primary underline hover:no-underline">
-          I have a 2FA code
         </Link>
       </div>
 

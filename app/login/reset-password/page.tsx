@@ -1,24 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { updateForgottenPassword } from "@/modules/auth/serverActions/auth.action";
+import { resetPasswordSchema } from "@/modules/auth/types/auth.schema";
 
-export default function ResetPasswordPage({ searchParams }: { searchParams: { token?: string } }) {
+export default function ResetPasswordPage({ searchParams }: { searchParams: Promise<{ token?: string }> }) {
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isPending, setIsPending] = useState(false);
-  const token = searchParams.token;
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { token } = React.use(searchParams);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
+    setErrors({});
+
+    const parsed = resetPasswordSchema.safeParse({ password, confirmPassword });
+    if (!parsed.success) {
+      const fieldErrors: Record<string, string> = {};
+      for (const issue of parsed.error.issues) {
+        const key = issue.path[0];
+        if (typeof key === "string") fieldErrors[key] = issue.message;
+      }
+      setErrors(fieldErrors);
       return;
     }
+
     setIsPending(true);
 
     try {
@@ -58,6 +69,10 @@ export default function ResetPasswordPage({ searchParams }: { searchParams: { to
                 onChange={(e) => setPassword(e.target.value)}
                 className="block w-full rounded-md border border-border bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-ring/50"
               />
+              {errors.password && <p className="mt-1 text-xs text-destructive">{errors.password}</p>}
+              <p className="mt-1 text-xs text-muted-foreground">
+                Must be at least 8 characters with one uppercase letter and one number.
+              </p>
             </div>
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium mb-1">
@@ -72,6 +87,7 @@ export default function ResetPasswordPage({ searchParams }: { searchParams: { to
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="block w-full rounded-md border border-border bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-ring/50"
               />
+              {errors.confirmPassword && <p className="mt-1 text-xs text-destructive">{errors.confirmPassword}</p>}
             </div>
 
             <Button type="submit" disabled={isPending} className="w-full">

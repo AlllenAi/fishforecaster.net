@@ -51,7 +51,6 @@ export const PLAN_CONFIG = {
     price: "$7",
     period: "/3 months",
     description: "All freshwater zones",
-    envKey: "STRIPE_FRESHWATER_PRICE_ID",
     features: [
       "5 freshwater zone forecasts",
       "Daily bite scores",
@@ -66,7 +65,6 @@ export const PLAN_CONFIG = {
     price: "$7",
     period: "/3 months",
     description: "All saltwater zones",
-    envKey: "STRIPE_SALTWATER_PRICE_ID",
     features: [
       "8 saltwater zone forecasts",
       "Daily bite scores",
@@ -81,7 +79,6 @@ export const PLAN_CONFIG = {
     price: "$12",
     period: "/3 months",
     description: "Everything, all zones",
-    envKey: "STRIPE_ALL_ACCESS_PRICE_ID",
     badge: "Best Value",
     features: [
       "All 13 zone forecasts",

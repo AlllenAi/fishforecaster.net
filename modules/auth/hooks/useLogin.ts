@@ -16,7 +16,6 @@ export function useLogin() {
         email: input.email,
         password: input.password,
         twoFactorCode: input.twoFactorCode,
-        rememberMe: input.rememberMe ? "1" : "0",
         redirect: false,
       });
 

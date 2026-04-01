@@ -79,7 +79,10 @@ export async function POST(req: NextRequest) {
     }
   } catch (err) {
     console.error(`[Stripe Webhook] Error processing ${event.type}:`, err);
-    // Still return 200 so Stripe doesn't retry endlessly
+    return NextResponse.json(
+      { error: "Webhook processing failed" },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ received: true });

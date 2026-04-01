@@ -3,7 +3,7 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
-import { registerSchema, type RegisterInput } from "../types/auth.schema";
+import { registerSchema, passwordSchema, type RegisterInput } from "../types/auth.schema";
 import { ConflictError, ValidationError } from "@/lib/auth/types";
 import { sendWelcomeEmail } from "@/modules/email/serverActions/email.action";
 import { sendEmail } from "@/modules/email/services/emailService";
@@ -151,8 +151,13 @@ export async function sendPasswordResetRequest(email: string) {
 }
 
 export async function updateForgottenPassword(token: string, newPassword: string) {
-  if (!token || !newPassword || newPassword.length < 8) {
-    throw new Error("Invalid token or password");
+  if (!token) {
+    throw new Error("Invalid token");
+  }
+
+  const passwordResult = passwordSchema.safeParse(newPassword);
+  if (!passwordResult.success) {
+    throw new Error(passwordResult.error.issues[0].message);
   }
 
   const user = await prisma.user.findFirst({
@@ -177,6 +182,17 @@ export async function updateForgottenPassword(token: string, newPassword: string
   });
 
   return { success: true };
+}
+
+export async function checkTwoFactorRequired(email: string): Promise<boolean> {
+  if (!email) return false;
+
+  const user = await prisma.user.findUnique({
+    where: { email },
+    select: { twoFactorEnabled: true },
+  });
+
+  return user?.twoFactorEnabled ?? false;
 }
 
 export async function disableTwoFactor(email: string) {
