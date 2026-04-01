@@ -1,8 +1,19 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useLeadCapture } from "../hooks/useLeadCapture";
+import { Check } from "lucide-react";
 
 export function HeroSection() {
+  const [email, setEmail] = useState("");
+  const { mutate, isPending, isSuccess } = useLeadCapture();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email.trim()) mutate(email.trim());
+  };
+
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
@@ -52,6 +63,26 @@ export function HeroSection() {
               className="absolute inset-0 h-full w-full"
             />
           </div>
+          {isSuccess ? (
+            <div className="mt-4 flex items-center justify-center gap-2 text-sm font-medium text-score-excellent">
+              <Check className="h-4 w-4" />
+              <span>Check your email for the cheat sheet!</span>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="mt-4 flex gap-2">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="flex-1 rounded-lg border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+              <Button type="submit" size="sm" disabled={isPending}>
+                {isPending ? "..." : "Sign Up"}
+              </Button>
+            </form>
+          )}
         </div>
       </div>
     </section>
