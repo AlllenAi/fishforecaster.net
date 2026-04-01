@@ -1,8 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ScoreCircle } from "@/modules/forecast/ui/ScoreCircle";
-import { ScoreLabel } from "@/modules/forecast/ui/ScoreLabel";
 
 export function HeroSection() {
   const scrollTo = (id: string) => {
@@ -43,20 +41,16 @@ export function HeroSection() {
           </p>
         </div>
 
-        {/* Score preview */}
-        <div className="flex flex-col items-center gap-3">
-          <div className="rounded-2xl border bg-card/50 p-8 backdrop-blur">
-            <p className="mb-4 text-center text-sm font-medium text-muted-foreground">
-              Today&apos;s Top Zone
-            </p>
-            <div className="flex flex-col items-center gap-3">
-              <ScoreCircle score={84} size="lg" />
-              <ScoreLabel label="EXCELLENT" />
-              <p className="text-lg font-semibold">San Clemente Basin</p>
-              <p className="text-sm text-muted-foreground">
-                Best window: 5:40 AM
-              </p>
-            </div>
+        {/* Promo video */}
+        <div className="w-full max-w-md lg:max-w-lg">
+          <div className="relative overflow-hidden rounded-2xl border bg-card/50 backdrop-blur aspect-video">
+            <iframe
+              src="https://www.youtube.com/embed/7h0ETkUD2Eg"
+              title="TheFishForecaster Promo"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="absolute inset-0 h-full w-full"
+            />
           </div>
         </div>
       </div>
