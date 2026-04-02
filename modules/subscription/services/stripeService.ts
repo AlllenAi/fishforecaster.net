@@ -11,9 +11,9 @@ export { stripe };
 // Maps plan names to Stripe Price IDs from environment variables.
 
 const PRICE_IDS: Record<string, string | undefined> = {
-  FRESHWATER: process.env.STRIPE_PRICE_FRESHWATER,
-  SALTWATER: process.env.STRIPE_PRICE_SALTWATER,
-  ALL_ACCESS: process.env.STRIPE_PRICE_ALL_ACCESS,
+  FRESHWATER: process.env.STRIPE_FRESHWATER_PRICE_ID,
+  SALTWATER: process.env.STRIPE_SALTWATER_PRICE_ID,
+  ALL_ACCESS: process.env.STRIPE_ALL_ACCESS_PRICE_ID,
 };
 
 export function getPriceId(plan: string): string {
