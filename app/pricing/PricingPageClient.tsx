@@ -7,6 +7,7 @@ import { PricingCards } from "@/modules/subscription/ui/PricingCards";
 
 interface PricingPageClientProps {
   currentTier: "FREE" | "FRESHWATER" | "SALTWATER" | "ALL_ACCESS" | null;
+  isLoggedIn: boolean;
 }
 
 const faqs = [
@@ -37,7 +38,7 @@ const faqs = [
   },
 ];
 
-export function PricingPageClient({ currentTier }: PricingPageClientProps) {
+export function PricingPageClient({ currentTier, isLoggedIn }: PricingPageClientProps) {
   return (
     <div className="min-h-screen bg-background">
       {/* Nav */}
@@ -84,7 +85,7 @@ export function PricingPageClient({ currentTier }: PricingPageClientProps) {
       {/* Plans */}
       <section className="px-4 pb-16">
         <div className="mx-auto max-w-5xl">
-          <PricingCards currentTier={currentTier} />
+          <PricingCards currentTier={currentTier} interactive={isLoggedIn} />
         </div>
       </section>
 
