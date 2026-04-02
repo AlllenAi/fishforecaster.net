@@ -36,8 +36,5 @@ jobs:
       - name: 🚧 Build Next.js
         run: yarn build
 
-      # Optional: Playwright tests
-      - name: 🧪 Playwright tests
-        run: yarn test
-        env:
-          CI: true
+      - name: 🧪 Unit tests
+        run: yarn test:unit
