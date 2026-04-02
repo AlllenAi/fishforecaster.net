@@ -12,7 +12,7 @@ import { renderWeeklyDigestEmail } from "../templates/WeeklyDigestEmail";
 import { emailPreferencesSchema } from "../types/email.schema";
 import type { DigestDay } from "../types/email.schema";
 
-const BASE_URL = process.env.NEXTAUTH_URL || "http://localhost:3000";
+const BASE_URL = process.env.AUTH_URL || "http://localhost:3000";
 
 function generateToken(): string {
   return crypto.randomBytes(32).toString("hex");

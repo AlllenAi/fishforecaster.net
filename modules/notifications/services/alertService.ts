@@ -15,7 +15,7 @@ import type {
 } from "../types/notification.schema";
 import type webpush from "web-push";
 
-const BASE_URL = process.env.NEXTAUTH_URL || "http://localhost:3000";
+const BASE_URL = process.env.AUTH_URL || "http://localhost:3000";
 
 function generateToken(): string {
   return crypto.randomBytes(32).toString("hex");

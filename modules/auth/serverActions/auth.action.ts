@@ -122,7 +122,7 @@ export async function sendPasswordResetRequest(email: string) {
   const user = await prisma.user.findUnique({ where: { email } });
   const token = crypto.randomBytes(48).toString("hex");
   const expiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
-  const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+  const baseUrl = process.env.AUTH_URL || "http://localhost:3000";
   const resetUrl = `${baseUrl}/login/reset-password?token=${token}`;
 
   if (user) {

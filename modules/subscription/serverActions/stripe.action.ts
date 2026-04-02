@@ -50,7 +50,7 @@ export const createCheckout = withAccess(
       }
     }
 
-    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+    const baseUrl = process.env.AUTH_URL || "http://localhost:3000";
 
     const session = await createCheckoutSession(
       customerId,
@@ -81,7 +81,7 @@ export const createPortalSession = withAccess(
       throw new Error("No active subscription found");
     }
 
-    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+    const baseUrl = process.env.AUTH_URL || "http://localhost:3000";
 
     const session = await createBillingPortalSession(
       subscription.stripeCustomerId,
