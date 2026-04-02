@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { recordAnonymousConsent } from "../serverActions/privacy.action";
 import { COOKIE_POLICY_VERSION } from "../types/privacy.schema";
 
@@ -12,21 +12,17 @@ interface CookiePreferences {
 }
 
 export function useCookieConsent() {
-  const [hasConsented, setHasConsented] = useState<boolean | null>(null);
+  const [hasConsented, setHasConsented] = useState<boolean | null>(() => {
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem(STORAGE_KEY) !== null;
+  });
   const [preferences, setPreferences] = useState<CookiePreferences | null>(
-    null
-  );
-
-  // Check localStorage on mount
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      setHasConsented(true);
-      setPreferences(JSON.parse(stored));
-    } else {
-      setHasConsented(false);
+    () => {
+      if (typeof window === "undefined") return null;
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored ? JSON.parse(stored) : null;
     }
-  }, []);
+  );
 
   const acceptAll = useCallback(() => {
     const prefs: CookiePreferences = { essential: true, analytics: true };
