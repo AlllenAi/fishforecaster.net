@@ -13,7 +13,7 @@ export function useRegister() {
   return useMutation({
     mutationFn: async (input: RegisterInput) => {
       const result = await register(input);
-      if (!result.success) throw new Error("Registration failed");
+      if (!result.success) throw new Error(result.error || "Registration failed");
 
       const signInResult = await signIn("credentials", {
         email: input.email,

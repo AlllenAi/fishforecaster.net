@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
 import { registerSchema, passwordSchema, type RegisterInput } from "../types/auth.schema";
-import { ConflictError, ValidationError } from "@/lib/auth/types";
+// Error types are handled via try-catch with error return pattern
 import { sendWelcomeEmail } from "@/modules/email/serverActions/email.action";
 import { sendEmail } from "@/modules/email/services/emailService";
 import speakeasy from "speakeasy";
@@ -18,47 +18,53 @@ import {
   TERMS_VERSION,
 } from "@/modules/privacy/types/privacy.schema";
 
-export async function register(input: RegisterInput) {
-  const parsed = registerSchema.safeParse(input);
-  if (!parsed.success) {
-    throw new ValidationError(parsed.error.issues[0].message);
+export async function register(input: RegisterInput): Promise<{ success: boolean; userId?: string; error?: string }> {
+  try {
+    const parsed = registerSchema.safeParse(input);
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0].message };
+    }
+
+    const { name, email, password } = parsed.data;
+
+    await checkRegisterLimit(email);
+
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      return { success: false, error: "An account with this email already exists" };
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        roles: ["user"],
+        subscriptionTier: "FREE",
+      },
+    });
+
+    // Record GDPR consent (terms + privacy policy acceptance)
+    await prisma.consent.createMany({
+      data: [
+        { userId: user.id, type: "terms", version: TERMS_VERSION, granted: true },
+        { userId: user.id, type: "privacy", version: PRIVACY_POLICY_VERSION, granted: true },
+      ],
+    });
+
+    // Send welcome email (fire and forget)
+    sendWelcomeEmail(user.id).catch((err) =>
+      console.error("[Auth] Failed to send welcome email:", err)
+    );
+
+    return { success: true, userId: user.id };
+  } catch (error) {
+    console.error("[Auth] Registration error:", error);
+    const message = error instanceof Error ? error.message : "Registration failed";
+    return { success: false, error: message };
   }
-
-  const { name, email, password } = parsed.data;
-
-  await checkRegisterLimit(email);
-
-  const existing = await prisma.user.findUnique({ where: { email } });
-  if (existing) {
-    throw new ConflictError("An account with this email already exists");
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 12);
-
-  const user = await prisma.user.create({
-    data: {
-      name,
-      email,
-      password: hashedPassword,
-      roles: ["user"],
-      subscriptionTier: "FREE",
-    },
-  });
-
-  // Record GDPR consent (terms + privacy policy acceptance)
-  await prisma.consent.createMany({
-    data: [
-      { userId: user.id, type: "terms", version: TERMS_VERSION, granted: true },
-      { userId: user.id, type: "privacy", version: PRIVACY_POLICY_VERSION, granted: true },
-    ],
-  });
-
-  // Send welcome email (fire and forget)
-  sendWelcomeEmail(user.id).catch((err) =>
-    console.error("[Auth] Failed to send welcome email:", err)
-  );
-
-  return { success: true, userId: user.id };
 }
 
 export async function setupTwoFactor(email: string) {
