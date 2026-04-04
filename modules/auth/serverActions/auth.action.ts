@@ -43,6 +43,7 @@ export async function register(input: RegisterInput): Promise<{ success: boolean
         password: hashedPassword,
         roles: ["user"],
         subscriptionTier: "FREE",
+        unsubscribeToken: crypto.randomBytes(32).toString("hex"),
       },
     });
 
