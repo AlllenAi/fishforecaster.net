@@ -133,7 +133,7 @@ describe("Stripe Webhook POST", () => {
     expect(json.received).toBe(true);
   });
 
-  it("returns 500 when activateSubscription throws", async () => {
+  it("returns 200 when activateSubscription throws to prevent Stripe retries", async () => {
     const event = makeCheckoutEvent({
       userId: "user_123",
       plan: "SALTWATER",
@@ -142,10 +142,10 @@ describe("Stripe Webhook POST", () => {
     mockActivateSubscription.mockRejectedValue(new Error("DB down"));
 
     const res = await POST(makeRequest("body", "valid_sig"));
-    expect(res.status).toBe(500);
+    expect(res.status).toBe(200);
 
     const json = await res.json();
-    expect(json.error).toBe("Webhook processing failed");
+    expect(json.received).toBe(true);
   });
 
   it("handles non-string customer and payment_intent gracefully", async () => {
