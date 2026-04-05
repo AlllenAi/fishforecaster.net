@@ -57,7 +57,7 @@ model User {
   password               String?
   twoFactorEnabled       Boolean          @default(false)
   twoFactorSecret        String?
-  passwordResetToken     String?          @unique
+  passwordResetToken     String?
   passwordResetExpiresAt DateTime?
   emailVerified          DateTime?
   image                  String?
