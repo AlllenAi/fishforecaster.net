@@ -20,7 +20,9 @@ export function useLogin() {
       });
 
       if (signInResult?.error) {
-        throw new Error(signInResult.error || "Invalid email or password");
+        // NextAuth v5 returns "Configuration" or "CredentialsSignin" when
+        // authorize() returns null — map it to a user-friendly message
+        throw new Error("Invalid email or password");
       }
 
       return signInResult;
