@@ -36,13 +36,16 @@ export async function register(input: RegisterInput): Promise<{ success: boolean
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    const trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+
     const user = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
         roles: ["user"],
-        subscriptionTier: "FREE",
+        subscriptionTier: "ALL_ACCESS",
+        trialEndsAt,
         unsubscribeToken: crypto.randomBytes(32).toString("hex"),
       },
     });

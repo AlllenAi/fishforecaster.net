@@ -78,6 +78,7 @@ model User {
   notifyHighScore        Boolean          @default(true)
   notifyBiteWindow       Boolean          @default(true)
   highScoreThreshold     Int              @default(80)
+  trialEndsAt            DateTime?
   createdAt              DateTime         @default(now())
   updatedAt              DateTime         @updatedAt
 

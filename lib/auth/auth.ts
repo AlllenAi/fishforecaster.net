@@ -77,14 +77,36 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
 
       // On subsequent requests, refresh the tier from the database
-      // so the session stays current after a Stripe purchase
+      // so the session stays current after a Stripe purchase or trial expiry
       if (token.userId) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.userId as string },
-          select: { subscriptionTier: true },
+          select: { subscriptionTier: true, trialEndsAt: true },
         });
         if (dbUser) {
-          token.subscriptionTier = dbUser.subscriptionTier;
+          // Auto-expire trial: if trial has ended and no paid subscription, downgrade to FREE
+          if (
+            dbUser.trialEndsAt &&
+            dbUser.trialEndsAt < new Date() &&
+            dbUser.subscriptionTier !== "FREE"
+          ) {
+            const hasPaidSubscription = await prisma.subscription.findUnique({
+              where: { userId: token.userId as string },
+              select: { status: true },
+            });
+
+            if (!hasPaidSubscription || hasPaidSubscription.status !== "ACTIVE") {
+              await prisma.user.update({
+                where: { id: token.userId as string },
+                data: { subscriptionTier: "FREE", trialEndsAt: null },
+              });
+              token.subscriptionTier = "FREE";
+            } else {
+              token.subscriptionTier = dbUser.subscriptionTier;
+            }
+          } else {
+            token.subscriptionTier = dbUser.subscriptionTier;
+          }
         }
       }
 

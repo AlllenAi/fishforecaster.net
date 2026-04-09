@@ -57,15 +57,23 @@ export function SpeciesFilter({
         {value.length > 0 ? (
           <>
             <span>Species ({value.length})</span>
-            <button
+            <span
+              role="button"
+              tabIndex={0}
               onClick={(e) => {
                 e.stopPropagation();
                 onChange([]);
               }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.stopPropagation();
+                  onChange([]);
+                }
+              }}
               className="rounded-full p-0.5 hover:bg-background"
             >
               <X className="h-3 w-3" />
-            </button>
+            </span>
           </>
         ) : (
           <span>Species</span>
