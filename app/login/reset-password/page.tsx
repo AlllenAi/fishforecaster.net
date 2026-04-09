@@ -1,19 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { updateForgottenPassword } from "@/modules/auth/serverActions/auth.action";
 import { resetPasswordSchema } from "@/modules/auth/types/auth.schema";
 
-export default function ResetPasswordPage({ searchParams }: { searchParams: Promise<{ token?: string }> }) {
+export default function ResetPasswordPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token") || "";
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isPending, setIsPending] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const { token } = React.use(searchParams);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -59,7 +60,7 @@ export default function ResetPasswordPage({ searchParams }: { searchParams: Prom
 
         <div className="border rounded-lg p-6 bg-card shadow-sm">
           <form onSubmit={handleSubmit} className="space-y-4">
-            <input type="hidden" name="token" value={token ?? ""} />
+            <input type="hidden" name="token" value={token} />
             <div>
               <label htmlFor="password" className="block text-sm font-medium mb-1">
                 New Password
