@@ -26,6 +26,8 @@ export interface PlatformStats {
   activeSubscriptions: number;
   totalCatchReports: number;
   totalLeads: number;
+  totalCommunityPosts: number;
+  pendingCommunityPosts: number;
   tierBreakdown: Record<string, number>;
   recentSignups: number; // last 7 days
   recentCatches: number; // last 7 days

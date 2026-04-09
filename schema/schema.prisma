@@ -34,6 +34,13 @@ enum Confidence {
   HIGH
 }
 
+enum PostStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum SubscriptionPlan {
   FRESHWATER
   SALTWATER
@@ -74,10 +81,15 @@ model User {
   createdAt              DateTime         @default(now())
   updatedAt              DateTime         @updatedAt
 
-  accounts     Account[]
-  sessions     Session[]
-  subscription Subscription?
-  catchReports CatchReport[]
+  accounts          Account[]
+  sessions          Session[]
+  subscription      Subscription?
+  catchReports      CatchReport[]
+  communityPosts    CommunityPost[]
+  communityComments CommunityComment[]
+  communityLikes    CommunityLike[]
+  communityEvents   CommunityEvent[]
+  eventRsvps        EventRSVP[]
 
   @@map("users")
 }
@@ -247,4 +259,99 @@ model Consent {
   @@index([userId])
   @@index([type])
   @@map("consents")
+}
+
+enum RSVPStatus {
+  GOING
+  INTERESTED
+}
+
+// ─── Community Models ────────────────────────────────────
+
+model CommunityEvent {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String     @db.ObjectId
+  title       String
+  description String
+  photoUrl    String?
+  location    String
+  eventDate   DateTime
+  endDate     DateTime?
+  status      PostStatus @default(DRAFT)
+  rejectionReason String?
+  isDeleted   Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  user  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rsvps EventRSVP[]
+
+  @@index([status, eventDate])
+  @@index([userId])
+  @@map("community_events")
+}
+
+model EventRSVP {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  eventId   String     @db.ObjectId
+  userId    String     @db.ObjectId
+  status    RSVPStatus
+  createdAt DateTime   @default(now())
+
+  event CommunityEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@map("event_rsvps")
+}
+
+model CommunityPost {
+  id              String     @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String     @db.ObjectId
+  title           String
+  story           String
+  photoUrls       String[]
+  location        String?
+  species         String[]
+  status          PostStatus @default(DRAFT)
+  rejectionReason String?
+  isDeleted       Boolean    @default(false)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  user     User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments CommunityComment[]
+  likes    CommunityLike[]
+
+  @@index([status, createdAt])
+  @@index([userId])
+  @@map("community_posts")
+}
+
+model CommunityComment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  postId    String   @db.ObjectId
+  userId    String   @db.ObjectId
+  text      String
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  post CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@map("community_comments")
+}
+
+model CommunityLike {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  postId    String   @db.ObjectId
+  userId    String   @db.ObjectId
+  createdAt DateTime @default(now())
+
+  post CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@map("community_likes")
 }

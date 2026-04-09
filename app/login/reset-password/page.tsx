@@ -33,9 +33,13 @@ export default function ResetPasswordPage({ searchParams }: { searchParams: Prom
     setIsPending(true);
 
     try {
-      await updateForgottenPassword(token || "", password);
-      toast.success("Password has been reset. Sign in with your new password.");
-      router.push("/login");
+      const result = await updateForgottenPassword(token || "", password);
+      if (result.success) {
+        toast.success("Password has been reset. Sign in with your new password.");
+        router.push("/login");
+      } else {
+        toast.error(result.error || "Could not reset password.");
+      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not reset password.");
     } finally {

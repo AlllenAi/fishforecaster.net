@@ -24,6 +24,8 @@ export const getPlatformStats = withPermission("admin")(
       activeSubscriptions,
       totalCatchReports,
       totalLeads,
+      totalCommunityPosts,
+      pendingCommunityPosts,
       recentSignups,
       recentCatches,
       freeUsers,
@@ -35,6 +37,8 @@ export const getPlatformStats = withPermission("admin")(
       prisma.subscription.count({ where: { status: "ACTIVE" } }),
       prisma.catchReport.count({ where: { isDeleted: false } }),
       prisma.lead.count(),
+      prisma.communityPost.count({ where: { isDeleted: false } }),
+      prisma.communityPost.count({ where: { status: "PENDING", isDeleted: false } }),
       prisma.user.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
       prisma.catchReport.count({
         where: { createdAt: { gte: sevenDaysAgo }, isDeleted: false },
@@ -51,6 +55,8 @@ export const getPlatformStats = withPermission("admin")(
         activeSubscriptions,
         totalCatchReports,
         totalLeads,
+        totalCommunityPosts,
+        pendingCommunityPosts,
         recentSignups,
         recentCatches,
         tierBreakdown: {

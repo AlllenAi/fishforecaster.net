@@ -8,6 +8,7 @@ const navItems = [
   { href: "/dashboard", label: "Forecasts" },
   { href: "/dashboard/map", label: "Map" },
   { href: "/dashboard/catches", label: "Catches" },
+  { href: "/dashboard/community", label: "Community" },
   { href: "/dashboard/account", label: "Account" },
 ];
 

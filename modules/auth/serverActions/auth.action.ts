@@ -159,12 +159,12 @@ export async function sendPasswordResetRequest(email: string) {
 
 export async function updateForgottenPassword(token: string, newPassword: string) {
   if (!token) {
-    throw new Error("Invalid token");
+    return { success: false, error: "Invalid token" };
   }
 
   const passwordResult = passwordSchema.safeParse(newPassword);
   if (!passwordResult.success) {
-    throw new Error(passwordResult.error.issues[0].message);
+    return { success: false, error: passwordResult.error.issues[0].message };
   }
 
   const user = await prisma.user.findFirst({
@@ -175,7 +175,7 @@ export async function updateForgottenPassword(token: string, newPassword: string
   });
 
   if (!user) {
-    throw new Error("Invalid or expired password reset token");
+    return { success: false, error: "Invalid or expired password reset token" };
   }
 
   const hashed = await bcrypt.hash(newPassword, 12);
@@ -188,7 +188,7 @@ export async function updateForgottenPassword(token: string, newPassword: string
     },
   });
 
-  return { success: true };
+  return { success: true as const };
 }
 
 export async function checkTwoFactorRequired(email: string): Promise<boolean> {
