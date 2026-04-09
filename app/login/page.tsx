@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import { LoginForm } from "@/modules/auth/ui/LoginForm";
+import { LoginErrorBanner } from "@/modules/auth/ui/LoginErrorBanner";
 
 export const metadata = {
   title: "Sign In - The Fish Forecaster",
@@ -16,6 +18,9 @@ export default function LoginPage() {
             Sign in to your account
           </p>
         </div>
+        <Suspense>
+          <LoginErrorBanner />
+        </Suspense>
         <div className="border rounded-lg p-6 bg-card shadow-sm">
           <LoginForm />
         </div>
