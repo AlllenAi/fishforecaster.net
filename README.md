@@ -147,3 +147,5 @@ Modern, unbranded, and ready for everything from ideas to production.
 npx degit nimda/hackme my-app
 cd my-app && yarn install
 ```
+
+## Deployment Trigger - Dev Branch
