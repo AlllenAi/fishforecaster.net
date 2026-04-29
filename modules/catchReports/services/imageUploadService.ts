@@ -1,8 +1,12 @@
+"use server";
+
 import { put } from "@vercel/blob";
 
 export async function uploadCatchPhoto(
-  file: File
+  formData: FormData
 ): Promise<string> {
+  const file = formData.get("photo") as File;
+  if (!file) throw new Error("No photo provided");
   // Validate file
   const maxSize = 5 * 1024 * 1024; // 5MB
   if (file.size > maxSize) {
@@ -20,7 +24,7 @@ export async function uploadCatchPhoto(
 
   // Upload to Vercel Blob
   const blob = await put(filename, file, {
-    access: "public",
+    access: "private",
     addRandomSuffix: false,
   });
 

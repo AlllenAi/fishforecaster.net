@@ -3,6 +3,7 @@
 import { withPermission } from "@/lib/middleware/withPermission";
 import { AuthContext } from "@/lib/auth/types";
 import { prisma } from "@/lib/prisma";
+import { signBlobUrl } from "@/lib/blob";
 import { logAction, getAuditLogs } from "../services/auditService";
 import {
   adminUserQuerySchema,
@@ -180,7 +181,14 @@ export const getAdminReports = withPermission("admin")(
       prisma.catchReport.count({ where }),
     ]);
 
-    return { data: reports, total, page, totalPages: Math.ceil(total / limit) };
+    const signedReports = await Promise.all(
+      reports.map(async (r) => ({
+        ...r,
+        photoUrl: r.photoUrl ? await signBlobUrl(r.photoUrl) : null,
+      }))
+    );
+
+    return { data: signedReports, total, page, totalPages: Math.ceil(total / limit) };
   }
 );
 

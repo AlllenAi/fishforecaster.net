@@ -1,8 +1,15 @@
+"use server";
+
 import { put } from "@vercel/blob";
 
 export async function uploadCommunityPhotos(
-  files: File[]
+  formData: FormData
 ): Promise<string[]> {
+  const files = formData.getAll("photos") as File[];
+
+  if (files.length === 0) {
+    throw new Error("No photos provided");
+  }
   if (files.length > 5) {
     throw new Error("Maximum 5 photos allowed");
   }
@@ -24,7 +31,7 @@ export async function uploadCommunityPhotos(
     const filename = `community/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
     const blob = await put(filename, file, {
-      access: "public",
+      access: "private",
       addRandomSuffix: false,
     });
 

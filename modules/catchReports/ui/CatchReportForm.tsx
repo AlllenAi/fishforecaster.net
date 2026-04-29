@@ -70,7 +70,9 @@ export function CatchReportForm({ defaultZoneId, onSuccess }: CatchReportFormPro
     if (photoFile) {
       try {
         setIsUploading(true);
-        photoUrl = await uploadCatchPhoto(photoFile);
+        const formData = new FormData();
+        formData.append("photo", photoFile);
+        photoUrl = await uploadCatchPhoto(formData);
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Photo upload failed");
         setIsUploading(false);

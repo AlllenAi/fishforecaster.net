@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { withPermission } from "@/lib/middleware/withPermission";
 import type { AuthContext } from "@/lib/auth/types";
+import { signBlobUrls } from "@/lib/blob";
 import { logAction } from "@/modules/admin/services/auditService";
 import {
   adminCommunityQuerySchema,
@@ -43,7 +44,14 @@ export const getAdminCommunityPosts = withPermission("admin")(
       prisma.communityPost.count({ where }),
     ]);
 
-    return { data: posts, total, page, totalPages: Math.ceil(total / limit) };
+    const signedPosts = await Promise.all(
+      posts.map(async (p) => ({
+        ...p,
+        photoUrls: await signBlobUrls(p.photoUrls),
+      }))
+    );
+
+    return { data: signedPosts, total, page, totalPages: Math.ceil(total / limit) };
   }
 );
 

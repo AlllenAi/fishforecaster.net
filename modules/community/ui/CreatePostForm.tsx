@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useCreatePost } from "../hooks/useCreatePost";
 import { uploadCommunityPhotos } from "../services/imageUploadService";
-import { Camera, X, Send, MapPin, Fish, Sparkles } from "lucide-react";
+import { Camera, X, Send, MapPin, Fish, Sparkles, ImagePlus } from "lucide-react";
 import { toast } from "sonner";
 
 interface CreatePostFormProps {
@@ -81,7 +81,9 @@ export function CreatePostForm({ isFreeUser, onSuccess }: CreatePostFormProps) {
     let photoUrls: string[];
     try {
       setIsUploading(true);
-      photoUrls = await uploadCommunityPhotos(photoFiles);
+      const formData = new FormData();
+      photoFiles.forEach((file) => formData.append("photos", file));
+      photoUrls = await uploadCommunityPhotos(formData);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Photo upload failed");
       setIsUploading(false);
@@ -190,14 +192,25 @@ export function CreatePostForm({ isFreeUser, onSuccess }: CreatePostFormProps) {
           </div>
         )}
         {photoFiles.length < 5 && (
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            multiple
-            onChange={handlePhotosChange}
-            className="w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-sm file:font-medium"
-          />
+          <>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              onChange={handlePhotosChange}
+              className="hidden"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full"
+            >
+              <ImagePlus className="mr-2 h-4 w-4" />
+              Choose Photos
+            </Button>
+          </>
         )}
       </div>
 

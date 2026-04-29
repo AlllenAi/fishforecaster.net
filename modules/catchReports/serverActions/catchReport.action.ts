@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { withAccess } from "@/lib/middleware/withAccess";
 import type { AuthContext } from "@/lib/auth/types";
 import { NotFoundError, PermissionError } from "@/lib/auth/types";
+import { signBlobUrl } from "@/lib/blob";
 import {
   catchReportSchema,
   updateCatchReportSchema,
@@ -66,8 +67,8 @@ export const getCatchReports = withAccess(
     const hasMore = reports.length > limit;
     const items = hasMore ? reports.slice(0, limit) : reports;
 
-    return {
-      reports: items.map((r) => ({
+    const signedReports = await Promise.all(
+      items.map(async (r) => ({
         id: r.id,
         species: r.species,
         zoneId: r.zoneId,
@@ -76,12 +77,16 @@ export const getCatchReports = withAccess(
         caughtAt: r.caughtAt,
         lure: r.lure,
         weight: r.weight,
-        photoUrl: r.photoUrl,
+        photoUrl: r.photoUrl ? await signBlobUrl(r.photoUrl) : null,
         notes: r.notes,
         isVerified: r.isVerified,
         createdAt: r.createdAt,
         userName: r.user.name || "Anonymous Angler",
-      })),
+      }))
+    );
+
+    return {
+      reports: signedReports,
       nextCursor: hasMore ? items[items.length - 1].id : null,
     };
   }
@@ -103,21 +108,23 @@ export const getMyCatchReports = withAccess(
       orderBy: { caughtAt: "desc" },
     });
 
-    return reports.map((r) => ({
-      id: r.id,
-      species: r.species,
-      zoneId: r.zoneId,
-      zoneName: r.zone.name,
-      location: r.location as { lat: number; lon: number },
-      caughtAt: r.caughtAt,
-      lure: r.lure,
-      weight: r.weight,
-      photoUrl: r.photoUrl,
-      notes: r.notes,
-      isVerified: r.isVerified,
-      createdAt: r.createdAt,
-      userName: r.user.name || "Anonymous Angler",
-    }));
+    return Promise.all(
+      reports.map(async (r) => ({
+        id: r.id,
+        species: r.species,
+        zoneId: r.zoneId,
+        zoneName: r.zone.name,
+        location: r.location as { lat: number; lon: number },
+        caughtAt: r.caughtAt,
+        lure: r.lure,
+        weight: r.weight,
+        photoUrl: r.photoUrl ? await signBlobUrl(r.photoUrl) : null,
+        notes: r.notes,
+        isVerified: r.isVerified,
+        createdAt: r.createdAt,
+        userName: r.user.name || "Anonymous Angler",
+      }))
+    );
   }
 );
 
@@ -193,17 +200,19 @@ export const getCatchMapData = withAccess(
       orderBy: { caughtAt: "desc" },
     });
 
-    return reports.map((r) => ({
-      id: r.id,
-      species: r.species,
-      zoneName: r.zone.name,
-      location: r.location as { lat: number; lon: number },
-      caughtAt: r.caughtAt,
-      lure: r.lure,
-      weight: r.weight,
-      photoUrl: r.photoUrl,
-      userName: r.user.name || "Anonymous Angler",
-      waterType: r.zone.waterType,
-    }));
+    return Promise.all(
+      reports.map(async (r) => ({
+        id: r.id,
+        species: r.species,
+        zoneName: r.zone.name,
+        location: r.location as { lat: number; lon: number },
+        caughtAt: r.caughtAt,
+        lure: r.lure,
+        weight: r.weight,
+        photoUrl: r.photoUrl ? await signBlobUrl(r.photoUrl) : null,
+        userName: r.user.name || "Anonymous Angler",
+        waterType: r.zone.waterType,
+      }))
+    );
   }
 );

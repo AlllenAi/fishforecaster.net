@@ -5,6 +5,7 @@ import { withAccess } from "@/lib/middleware/withAccess";
 import { withPaidSubscription } from "@/lib/middleware/withPaidSubscription";
 import type { AuthContext } from "@/lib/auth/types";
 import { NotFoundError, PermissionError } from "@/lib/auth/types";
+import { signBlobUrls } from "@/lib/blob";
 import {
   createPostSchema,
   updatePostSchema,
@@ -64,7 +65,7 @@ export const getCommunityFeed = withAccess(
       ];
     }
 
-    const posts = await prisma.communityPost.findMany({
+    const rawPosts = await prisma.communityPost.findMany({
       where,
       include: {
         user: { select: { name: true, image: true } },
@@ -75,8 +76,8 @@ export const getCommunityFeed = withAccess(
       ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
     });
 
-    const hasMore = posts.length > limit;
-    const items = hasMore ? posts.slice(0, limit) : posts;
+    const hasMore = rawPosts.length > limit;
+    const items = hasMore ? rawPosts.slice(0, limit) : rawPosts;
 
     // Check which posts the current user has liked
     const likedPostIds = new Set(
@@ -91,12 +92,12 @@ export const getCommunityFeed = withAccess(
       ).map((l) => l.postId)
     );
 
-    return {
-      posts: items.map((p) => ({
+    const posts = await Promise.all(
+      items.map(async (p) => ({
         id: p.id,
         title: p.title,
         story: p.story,
-        photoUrls: p.photoUrls,
+        photoUrls: await signBlobUrls(p.photoUrls),
         location: p.location,
         species: p.species,
         status: p.status,
@@ -106,7 +107,11 @@ export const getCommunityFeed = withAccess(
         likeCount: p._count.likes,
         commentCount: p._count.comments,
         hasLiked: likedPostIds.has(p.id),
-      })),
+      }))
+    );
+
+    return {
+      posts,
       nextCursor: hasMore ? items[items.length - 1].id : null,
     };
   }
@@ -142,7 +147,7 @@ export const getPostById = withAccess(
       id: post.id,
       title: post.title,
       story: post.story,
-      photoUrls: post.photoUrls,
+      photoUrls: await signBlobUrls(post.photoUrls),
       location: post.location,
       species: post.species,
       status: post.status,
@@ -169,21 +174,23 @@ export const getMyPosts = withAccess(
       orderBy: { createdAt: "desc" },
     });
 
-    return posts.map((p) => ({
-      id: p.id,
-      title: p.title,
-      story: p.story,
-      photoUrls: p.photoUrls,
-      location: p.location,
-      species: p.species,
-      status: p.status,
-      createdAt: p.createdAt,
-      userName: p.user.name || "Anonymous Angler",
-      userImage: p.user.image,
-      likeCount: p._count.likes,
-      commentCount: p._count.comments,
-      hasLiked: false,
-    }));
+    return Promise.all(
+      posts.map(async (p) => ({
+        id: p.id,
+        title: p.title,
+        story: p.story,
+        photoUrls: await signBlobUrls(p.photoUrls),
+        location: p.location,
+        species: p.species,
+        status: p.status,
+        createdAt: p.createdAt,
+        userName: p.user.name || "Anonymous Angler",
+        userImage: p.user.image,
+        likeCount: p._count.likes,
+        commentCount: p._count.comments,
+        hasLiked: false,
+      }))
+    );
   }
 );
 

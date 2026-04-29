@@ -2,10 +2,24 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "25mb",
+    },
+  },
   turbopack: {
     root: __dirname,
   },
   images: {
+    localPatterns: [
+      {
+        pathname: "/api/images/**",
+        search: "?url=*",
+      },
+      {
+        pathname: "/**",
+      },
+    ],
     remotePatterns: [
       {
         protocol: "https",

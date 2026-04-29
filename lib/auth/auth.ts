@@ -81,9 +81,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token.userId) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.userId as string },
-          select: { subscriptionTier: true, trialEndsAt: true },
+          select: { subscriptionTier: true, trialEndsAt: true, roles: true },
         });
         if (dbUser) {
+          token.roles = dbUser.roles;
           // Auto-expire trial: if trial has ended and no paid subscription, downgrade to FREE
           if (
             dbUser.trialEndsAt &&

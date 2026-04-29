@@ -5,6 +5,7 @@ import { withAccess } from "@/lib/middleware/withAccess";
 import { withPaidSubscription } from "@/lib/middleware/withPaidSubscription";
 import type { AuthContext } from "@/lib/auth/types";
 import { NotFoundError, PermissionError } from "@/lib/auth/types";
+import { signBlobUrl } from "@/lib/blob";
 import {
   createEventSchema,
   updateEventSchema,
@@ -66,7 +67,7 @@ export const getEventsFeed = withAccess(
       ];
     }
 
-    const events = await prisma.communityEvent.findMany({
+    const rawEvents = await prisma.communityEvent.findMany({
       where,
       include: {
         user: { select: { name: true, image: true } },
@@ -77,8 +78,8 @@ export const getEventsFeed = withAccess(
       ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
     });
 
-    const hasMore = events.length > limit;
-    const items = hasMore ? events.slice(0, limit) : events;
+    const hasMore = rawEvents.length > limit;
+    const items = hasMore ? rawEvents.slice(0, limit) : rawEvents;
 
     // Get RSVP counts broken down by status, and user's RSVP
     const eventIds = items.map((e) => e.id);
@@ -110,14 +111,14 @@ export const getEventsFeed = withAccess(
       userRsvps.map((r) => [r.eventId, r.status as "GOING" | "INTERESTED"])
     );
 
-    return {
-      events: items.map((e) => {
+    const events = await Promise.all(
+      items.map(async (e) => {
         const counts = countsMap.get(e.id) || { going: 0, interested: 0 };
         return {
           id: e.id,
           title: e.title,
           description: e.description,
-          photoUrl: e.photoUrl,
+          photoUrl: e.photoUrl ? await signBlobUrl(e.photoUrl) : null,
           location: e.location,
           eventDate: e.eventDate,
           endDate: e.endDate,
@@ -129,7 +130,11 @@ export const getEventsFeed = withAccess(
           interestedCount: counts.interested,
           userRsvp: userRsvpMap.get(e.id) || null,
         };
-      }),
+      })
+    );
+
+    return {
+      events,
       nextCursor: hasMore ? items[items.length - 1].id : null,
     };
   }
@@ -178,7 +183,7 @@ export const getEventById = withAccess(
       id: event.id,
       title: event.title,
       description: event.description,
-      photoUrl: event.photoUrl,
+      photoUrl: event.photoUrl ? await signBlobUrl(event.photoUrl) : null,
       location: event.location,
       eventDate: event.eventDate,
       endDate: event.endDate,
@@ -208,22 +213,24 @@ export const getMyEvents = withAccess(
       orderBy: { eventDate: "desc" },
     });
 
-    return events.map((e) => ({
-      id: e.id,
-      title: e.title,
-      description: e.description,
-      photoUrl: e.photoUrl,
-      location: e.location,
-      eventDate: e.eventDate,
-      endDate: e.endDate,
-      status: e.status,
-      createdAt: e.createdAt,
-      userName: e.user.name || "Anonymous Angler",
-      userImage: e.user.image,
-      goingCount: e._count.rsvps,
-      interestedCount: 0,
-      userRsvp: null,
-    }));
+    return Promise.all(
+      events.map(async (e) => ({
+        id: e.id,
+        title: e.title,
+        description: e.description,
+        photoUrl: e.photoUrl ? await signBlobUrl(e.photoUrl) : null,
+        location: e.location,
+        eventDate: e.eventDate,
+        endDate: e.endDate,
+        status: e.status,
+        createdAt: e.createdAt,
+        userName: e.user.name || "Anonymous Angler",
+        userImage: e.user.image,
+        goingCount: e._count.rsvps,
+        interestedCount: 0,
+        userRsvp: null,
+      }))
+    );
   }
 );
 

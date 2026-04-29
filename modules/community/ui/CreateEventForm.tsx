@@ -61,7 +61,9 @@ export function CreateEventForm({
     if (photoFile) {
       try {
         setIsUploading(true);
-        const urls = await uploadCommunityPhotos([photoFile]);
+        const formData = new FormData();
+        formData.append("photos", photoFile);
+        const urls = await uploadCommunityPhotos(formData);
         photoUrl = urls[0];
       } catch (err) {
         toast.error(
