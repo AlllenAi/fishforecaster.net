@@ -52,7 +52,7 @@ export const PLAN_CONFIG = {
     period: "/3 months",
     description: "All freshwater zones",
     features: [
-      "5 freshwater zone forecasts",
+      "8 freshwater zone forecasts",
       "Daily bite scores",
       "Bite window predictions",
       "Species-specific scores",
@@ -81,7 +81,7 @@ export const PLAN_CONFIG = {
     description: "Everything, all zones",
     badge: "Best Value",
     features: [
-      "All 13 zone forecasts",
+      "All 16 zone forecasts",
       "Saltwater + freshwater",
       "Daily bite scores",
       "Bite window predictions",

@@ -23,7 +23,7 @@ const plans: {
     period: "/ 3 months",
     description: "All freshwater zones",
     features: [
-      "5 freshwater zone forecasts",
+      "8 freshwater zone forecasts",
       "Daily bite scores",
       "Bite window predictions",
       "Species-specific scores",
@@ -38,7 +38,7 @@ const plans: {
     period: "/ 3 months",
     description: "Everything, all zones",
     features: [
-      "All 13 zone forecasts",
+      "All 16 zone forecasts",
       "Saltwater + freshwater",
       "Daily bite scores",
       "Bite window predictions",
