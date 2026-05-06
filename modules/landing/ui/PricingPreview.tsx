@@ -25,7 +25,7 @@ const plans = [
     period: "/ 3 months",
     description: "Everything, all zones",
     features: [
-      "All 16 zone forecasts",
+      "All 22 zone forecasts",
       "Saltwater + freshwater",
       "Daily bite scores",
       "Bite window predictions",
@@ -42,7 +42,7 @@ const plans = [
     period: "/ 3 months",
     description: "All saltwater zones",
     features: [
-      "8 saltwater zone forecasts",
+      "14 saltwater zone forecasts",
       "Daily bite scores",
       "Bite window predictions",
       "Species-specific scores",
