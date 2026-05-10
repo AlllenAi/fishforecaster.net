@@ -17,10 +17,11 @@
 
 import type { Zone } from "@prisma/client";
 import type { ForecastResult, ForecastConditions } from "../types/scoring.types";
-import type { TideData, BuoyData, WeatherData } from "../types/weather.types";
+import type { TideData, BuoyData, WeatherData, MarineData } from "../types/weather.types";
 import { getTideData } from "./tideService";
 import { getBuoyData } from "./buoyService";
 import { getWeatherData } from "./weatherService";
+import { getMarineData } from "./marineService";
 import { getMoonPhaseData, weatherApiMoonPhaseToEnum } from "./moonService";
 import { calculateBiteScore } from "./scoreEngine";
 import { calculateBiteWindows } from "./windowEngine";
@@ -35,7 +36,7 @@ export async function generateForecast(
   // Step 1: Fetch all data sources in parallel using Promise.allSettled
   // This means if one fails, the others still complete (unlike Promise.all
   // which would cancel everything if one fails).
-  const [tideResult, buoyResult, weatherResult] = await Promise.allSettled([
+  const [tideResult, buoyResult, weatherResult, marineResult] = await Promise.allSettled([
     // Only fetch tide data for saltwater zones that have a tide station
     zone.tideStationId
       ? getTideData(zone.tideStationId, date)
@@ -46,6 +47,10 @@ export async function generateForecast(
       : Promise.resolve(null),
     // Weather is available for all zones
     getWeatherData(zone.lat, zone.lon),
+    // NOAA marine alerts and forecast text — saltwater zones only
+    zone.waterType === "SALT"
+      ? getMarineData(zone.lat, zone.lon)
+      : Promise.resolve(null),
   ]);
 
   // Extract data from settled promises (null if failed)
@@ -55,6 +60,8 @@ export async function generateForecast(
     buoyResult.status === "fulfilled" ? buoyResult.value : null;
   const weatherData: WeatherData | null =
     weatherResult.status === "fulfilled" ? weatherResult.value : null;
+  const marineData: MarineData | null =
+    marineResult.status === "fulfilled" ? marineResult.value : null;
 
   // Step 2: Calculate moon phase (pure math, never fails)
   const moonData = getMoonPhaseData(date);
@@ -70,6 +77,7 @@ export async function generateForecast(
     tideData,
     buoyData,
     weatherData,
+    marineData,
     moonData,
     species: zone.species,
     date,
@@ -79,6 +87,7 @@ export async function generateForecast(
   const biteWindows = calculateBiteWindows(tideData, weatherData, moonData, date);
 
   // Step 5: Build the conditions summary
+  const mostSevereAlert = marineData?.alerts[0] ?? null;
   const conditions: ForecastConditions = {
     waterTemp: buoyData?.latest.waterTemp ?? null,
     airTemp: weatherData?.current.tempF ?? buoyData?.latest.airTemp ?? null,
@@ -94,6 +103,14 @@ export async function generateForecast(
     sunrise: weatherData?.astronomy.sunrise ?? null,
     sunset: weatherData?.astronomy.sunset ?? null,
     tideDirection: tideData?.currentDirection ?? null,
+    marineAlert: mostSevereAlert
+      ? {
+          event: mostSevereAlert.event,
+          severity: mostSevereAlert.severity,
+          headline: mostSevereAlert.headline,
+        }
+      : null,
+    marineForecastText: marineData?.forecastText ?? null,
   };
 
   // Step 6: Generate the captain's call
@@ -102,7 +119,8 @@ export async function generateForecast(
     scoreResult.overallScore,
     scoreResult.label,
     conditions,
-    biteWindows
+    biteWindows,
+    marineData
   );
 
   // Step 7: Return complete forecast
@@ -131,9 +149,32 @@ function generateCaptainCall(
   score: number,
   label: string,
   conditions: ForecastConditions,
-  biteWindows: ForecastResult["biteWindows"]
+  biteWindows: ForecastResult["biteWindows"],
+  marine: MarineData | null = null
 ): string {
   const parts: string[] = [];
+
+  // Marine safety warnings take priority over everything else
+  if (marine?.hasStormWarning) {
+    const alert = marine.alerts.find(
+      (a) =>
+        a.event.toLowerCase().includes("storm warning") ||
+        a.event.toLowerCase().includes("hurricane") ||
+        a.event.toLowerCase().includes("hazardous seas")
+    );
+    parts.push(
+      `⚠ NOAA Storm Warning in effect for ${zone.name} — do not go offshore. ${alert?.event ?? "Storm Warning"} is active.`
+    );
+    return parts.join(" ");
+  }
+
+  if (marine?.hasGaleWarning) {
+    const alert = marine.alerts.find((a) => a.event.toLowerCase().includes("gale"));
+    parts.push(
+      `⚠ NOAA Gale Warning in effect for ${zone.name}. ${alert?.event ?? "Gale Warning"} is active — dangerous conditions for small craft.`
+    );
+    return parts.join(" ");
+  }
 
   // Overall assessment
   if (score >= 80) {
@@ -144,6 +185,12 @@ function generateCaptainCall(
     parts.push(`Decent conditions at ${zone.name}, but not ideal.`);
   } else {
     parts.push(`Tough day at ${zone.name}. Consider waiting for better conditions.`);
+  }
+
+  // Advisory note (non-blocking but worth mentioning)
+  if (marine?.hasAdvisory) {
+    const alert = marine.alerts[0];
+    parts.push(`Note: NOAA ${alert?.event ?? "Marine Advisory"} is currently active — use caution.`);
   }
 
   // Wind info

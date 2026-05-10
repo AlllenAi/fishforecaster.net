@@ -86,6 +86,25 @@ export type WeatherData = {
   astronomy: WeatherAstronomy;
 };
 
+// ─── NOAA Marine Forecast Data ──────────────────────────────
+
+export type MarineAlert = {
+  event: string;       // e.g. "Small Craft Advisory", "Gale Warning"
+  severity: string;    // e.g. "Moderate", "Severe"
+  headline: string;    // Short one-line summary
+  description: string; // Full text (truncated to 500 chars)
+  expires: string | null;
+};
+
+export type MarineData = {
+  alerts: MarineAlert[];
+  forecastText: string | null; // Plain-English NWS forecast, e.g. "NW winds 15-20 kt. Seas 5-7 ft."
+  // Derived convenience flags
+  hasAdvisory: boolean;     // Small Craft Advisory or similar
+  hasGaleWarning: boolean;  // Gale Warning (34-47 kt winds)
+  hasStormWarning: boolean; // Storm Warning, Hurricane Warning, etc.
+};
+
 // ─── Moon Phase (Algorithmic Fallback) ──────────────────────
 
 export type MoonPhaseData = {
