@@ -1,15 +1,11 @@
-// ─── NOAA Marine Forecast Service ───────────────────────────
+// ─── NOAA Marine Alert Service ───────────────────────────────
 //
-// Fetches official marine weather data from NOAA's National Weather Service API.
+// Fetches active marine weather alerts from NOAA's NWS API.
 // This is completely free — no API key required.
 //
-// We retrieve two things for each saltwater zone:
-//   1. Active marine alerts (Small Craft Advisory, Gale Warning, Storm Warning, etc.)
-//   2. NWS forecast text ("Northwest winds 15 to 20 knots. Seas 5 to 7 feet.")
-//
-// The alerts endpoint works for any US coordinate.
-// The forecast text endpoint may return a 404 for far-offshore locations — that's
-// expected and handled gracefully.
+// Note: the NWS gridpoints forecast endpoint does not support
+// offshore marine areas (returns 404 with "MarineForecastNotSupported"),
+// so we fetch only active alerts here.
 //
 // Docs: https://www.weather.gov/documentation/services-web-api
 
@@ -52,17 +48,11 @@ export async function getMarineData(lat: number, lon: number): Promise<MarineDat
   }
 
   try {
-    const [alertsResult, forecastResult] = await Promise.allSettled([
-      fetchMarineAlerts(lat, lon),
-      fetchNWSForecastText(lat, lon),
-    ]);
-
-    const alerts = alertsResult.status === "fulfilled" ? alertsResult.value : [];
-    const forecastText = forecastResult.status === "fulfilled" ? forecastResult.value : null;
+    const alerts = await fetchMarineAlerts(lat, lon);
 
     const data: MarineData = {
       alerts,
-      forecastText,
+      forecastText: null,
       hasAdvisory: alerts.some(
         (a) =>
           a.event.toLowerCase().includes("advisory") ||
@@ -81,7 +71,7 @@ export async function getMarineData(lat: number, lon: number): Promise<MarineDat
     marineCache.set(cacheKey, { data, timestamp: Date.now() });
     return data;
   } catch (error) {
-    console.error("Failed to fetch NOAA marine data:", error);
+    console.error("Failed to fetch NOAA marine alerts:", error);
     return null;
   }
 }
@@ -117,66 +107,4 @@ async function fetchMarineAlerts(lat: number, lon: number): Promise<MarineAlert[
       description: (f.properties.description ?? "").slice(0, 500),
       expires: f.properties.expires ?? null,
     }));
-}
-
-// ─── NWS Forecast Text ───────────────────────────────────────
-//
-// Tries to get the NWS text forecast for this location.
-// Step 1: Hit /points/{lat},{lon} to discover the NWS grid for this location.
-// Step 2: Fetch the gridpoint forecast text.
-//
-// For far-offshore zones this will fail with a 404 — that's normal and handled.
-
-async function fetchNWSForecastText(lat: number, lon: number): Promise<string | null> {
-  // Step 1: Discover the NWS grid
-  let pointsResponse: Response;
-  try {
-    pointsResponse = await fetchWithRetry(`${NWS_BASE}/points/${lat},${lon}`, {
-      label: "NOAA NWS Points",
-      timeoutMs: 8_000,
-      retries: 1,
-      headers: NWS_HEADERS,
-    });
-  } catch {
-    return null;
-  }
-
-  if (!pointsResponse.ok) return null;
-
-  let pointsJson: any;
-  try {
-    pointsJson = await pointsResponse.json();
-  } catch {
-    return null;
-  }
-
-  const forecastUrl: string | undefined = pointsJson.properties?.forecast;
-  if (!forecastUrl) return null;
-
-  // Step 2: Fetch the forecast
-  let forecastResponse: Response;
-  try {
-    forecastResponse = await fetchWithRetry(forecastUrl, {
-      label: "NOAA NWS Forecast",
-      timeoutMs: 8_000,
-      retries: 1,
-      headers: NWS_HEADERS,
-    });
-  } catch {
-    return null;
-  }
-
-  if (!forecastResponse.ok) return null;
-
-  let forecastJson: any;
-  try {
-    forecastJson = await forecastResponse.json();
-  } catch {
-    return null;
-  }
-
-  const periods: any[] = forecastJson.properties?.periods ?? [];
-  if (periods.length === 0) return null;
-
-  return periods[0].detailedForecast ?? null;
 }

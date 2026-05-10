@@ -16,6 +16,7 @@ import { NotFoundError, PermissionError } from "@/lib/auth/types";
 import { checkAndExpireSubscription } from "@/modules/subscription/services/subscriptionService";
 import { checkTierAccess } from "@/modules/subscription/types/subscription.schema";
 import { generateForecast } from "../services/forecastOrchestrator";
+import { getMarineData } from "../services/marineService";
 import { getForecastSchema, refreshForecastSchema } from "../types/forecast.schema";
 import type { ForecastResult } from "../types/scoring.types";
 
@@ -58,7 +59,20 @@ export const getForecast = withAccess(
     });
 
     if (existing) {
-      // Return the cached forecast
+      // Re-fetch marine alerts live — they change throughout the day and must not be stale
+      const cachedConditions = existing.conditions as ForecastResult["conditions"];
+      let marineAlert = cachedConditions.marineAlert ?? null;
+      let marineForecastText = cachedConditions.marineForecastText ?? null;
+
+      if (zone.waterType === "SALT") {
+        const marineData = await getMarineData(zone.lat, zone.lon);
+        const topAlert = marineData?.alerts[0] ?? null;
+        marineAlert = topAlert
+          ? { event: topAlert.event, severity: topAlert.severity, headline: topAlert.headline }
+          : null;
+        marineForecastText = marineData?.forecastText ?? null;
+      }
+
       return {
         zoneId: zone.id,
         zoneName: zone.name,
@@ -67,7 +81,7 @@ export const getForecast = withAccess(
         label: existing.label,
         confidence: existing.confidence,
         biteWindows: existing.biteWindows as ForecastResult["biteWindows"],
-        conditions: existing.conditions as ForecastResult["conditions"],
+        conditions: { ...cachedConditions, marineAlert, marineForecastText },
         captainCall: existing.captainCall ?? "",
         speciesScores: existing.speciesScores as ForecastResult["speciesScores"],
       };
