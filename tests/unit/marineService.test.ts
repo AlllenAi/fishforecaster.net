@@ -113,3 +113,133 @@ describe("marineService – small craft advisory", () => {
     expect(result).toBeNull();
   });
 });
+
+describe("marineService – gale warning", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("detects a gale warning and sets hasGaleWarning to true", async () => {
+    mockFetch.mockResolvedValueOnce(
+      makeNWSResponse([
+        {
+          event: "Gale Warning",
+          severity: "Severe",
+          headline: "Winds 34 to 47 kt expected.",
+        },
+      ])
+    );
+
+    const result = await getMarineData(34.01, -117.01);
+
+    expect(result).not.toBeNull();
+    expect(result!.hasGaleWarning).toBe(true);
+    expect(result!.hasAdvisory).toBe(false);
+    expect(result!.hasStormWarning).toBe(false);
+    expect(result!.alerts).toHaveLength(1);
+    expect(result!.alerts[0].event).toBe("Gale Warning");
+  });
+
+  it("does not count gale warning as a storm warning", async () => {
+    mockFetch.mockResolvedValueOnce(
+      makeNWSResponse([{ event: "Gale Warning", severity: "Severe" }])
+    );
+
+    const result = await getMarineData(34.02, -117.02);
+
+    expect(result!.hasStormWarning).toBe(false);
+  });
+
+  it("captures the headline and severity from a gale warning", async () => {
+    mockFetch.mockResolvedValueOnce(
+      makeNWSResponse([
+        {
+          event: "Gale Warning",
+          severity: "Severe",
+          headline: "Gale Warning in effect until 6 AM PST.",
+        },
+      ])
+    );
+
+    const result = await getMarineData(34.03, -117.03);
+
+    expect(result!.alerts[0].severity).toBe("Severe");
+    expect(result!.alerts[0].headline).toBe("Gale Warning in effect until 6 AM PST.");
+  });
+});
+
+describe("marineService – storm warning", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("detects a storm warning and sets hasStormWarning to true", async () => {
+    mockFetch.mockResolvedValueOnce(
+      makeNWSResponse([
+        {
+          event: "Storm Warning",
+          severity: "Extreme",
+          headline: "Winds 48 kt or greater expected.",
+        },
+      ])
+    );
+
+    const result = await getMarineData(35.01, -117.01);
+
+    expect(result).not.toBeNull();
+    expect(result!.hasStormWarning).toBe(true);
+    expect(result!.hasGaleWarning).toBe(false);
+    expect(result!.hasAdvisory).toBe(false);
+    expect(result!.alerts).toHaveLength(1);
+    expect(result!.alerts[0].event).toBe("Storm Warning");
+  });
+
+  it("detects a hurricane warning as a storm warning", async () => {
+    mockFetch.mockResolvedValueOnce(
+      makeNWSResponse([
+        {
+          event: "Hurricane Warning",
+          severity: "Extreme",
+          headline: "Hurricane Warning in effect.",
+        },
+      ])
+    );
+
+    const result = await getMarineData(35.02, -117.02);
+
+    expect(result!.hasStormWarning).toBe(true);
+  });
+
+  it("detects hazardous seas as a storm warning", async () => {
+    mockFetch.mockResolvedValueOnce(
+      makeNWSResponse([
+        {
+          event: "Hazardous Seas Warning",
+          severity: "Severe",
+          headline: "Seas 15 to 20 ft.",
+        },
+      ])
+    );
+
+    const result = await getMarineData(35.03, -117.03);
+
+    expect(result!.hasStormWarning).toBe(true);
+  });
+
+  it("escalating alerts: storm + gale + small craft all active at once", async () => {
+    mockFetch.mockResolvedValueOnce(
+      makeNWSResponse([
+        { event: "Storm Warning", severity: "Extreme" },
+        { event: "Gale Warning", severity: "Severe" },
+        { event: "Small Craft Advisory", severity: "Moderate" },
+      ])
+    );
+
+    const result = await getMarineData(35.04, -117.04);
+
+    expect(result!.hasStormWarning).toBe(true);
+    expect(result!.hasGaleWarning).toBe(true);
+    expect(result!.hasAdvisory).toBe(true);
+    expect(result!.alerts).toHaveLength(3);
+  });
+});
