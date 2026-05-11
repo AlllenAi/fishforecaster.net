@@ -15,7 +15,7 @@ import type { ForecastResult } from "@/modules/forecast/types/scoring.types";
 export async function GET(req: NextRequest) {
   // Verify cron secret to prevent unauthorized triggers
   const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET?.trim()}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
