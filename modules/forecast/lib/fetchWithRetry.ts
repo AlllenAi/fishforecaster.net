@@ -14,13 +14,15 @@ interface FetchWithRetryOptions {
   retries?: number;
   /** Label for log messages (e.g. "NOAA Tides") */
   label?: string;
+  /** Additional request headers */
+  headers?: Record<string, string>;
 }
 
 export async function fetchWithRetry(
   url: string,
   options: FetchWithRetryOptions = {}
 ): Promise<Response> {
-  const { timeoutMs = 10_000, retries = 2, label = "API" } = options;
+  const { timeoutMs = 10_000, retries = 2, label = "API", headers } = options;
 
   let lastError: Error | null = null;
 
@@ -29,7 +31,7 @@ export async function fetchWithRetry(
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
 
-      const response = await fetch(url, { signal: controller.signal });
+      const response = await fetch(url, { signal: controller.signal, headers });
       clearTimeout(timer);
 
       // Don't retry on 4xx (client errors) — only on 5xx (server errors)

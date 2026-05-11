@@ -75,6 +75,8 @@ export type ForecastConditions = {
   sunrise: string | null;
   sunset: string | null;
   tideDirection: "INCOMING" | "OUTGOING" | "SLACK" | null;
+  marineAlert: { event: string; severity: string; headline: string } | null;
+  marineForecastText: string | null;
 };
 
 // Individual factor scores (used internally by the scoring engine)

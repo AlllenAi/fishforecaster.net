@@ -10,6 +10,7 @@ import { ConditionsGrid } from "./ConditionsGrid";
 import { SpeciesScoreRow } from "./SpeciesScoreRow";
 import { CaptainCall } from "./CaptainCall";
 import { DatePicker } from "./DatePicker";
+import { MarineAlertBanner } from "./MarineAlertBanner";
 import { ForecastAccuracy } from "@/modules/catchReports/ui/ForecastAccuracy";
 import Link from "next/link";
 import { ArrowLeft, Shield } from "lucide-react";
@@ -94,6 +95,12 @@ export function ZoneDetailContent({ slug }: { slug: string }) {
               <ScoreCircle score={forecast.score} size="lg" />
             </div>
           </div>
+
+          {/* Marine Alert Banner */}
+          <MarineAlertBanner
+            marineAlert={forecast.conditions.marineAlert}
+            marineForecastText={forecast.conditions.marineForecastText}
+          />
 
           {/* Captain's Call */}
           {forecast.captainCall && (

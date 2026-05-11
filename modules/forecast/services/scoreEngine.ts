@@ -10,7 +10,7 @@
 // The scoring uses a weighted average — each factor gets a score from 0-100,
 // then we multiply by its weight (importance) and add them all up.
 
-import type { TideData, BuoyData, WeatherData, MoonPhaseData } from "../types/weather.types";
+import type { TideData, BuoyData, WeatherData, MoonPhaseData, MarineData } from "../types/weather.types";
 import type { ScoreLabelType, ConfidenceType, FactorScore, SpeciesScore } from "../types/scoring.types";
 import {
   SALTWATER_WEIGHTS,
@@ -28,6 +28,7 @@ export type ScoreInput = {
   tideData: TideData | null;
   buoyData: BuoyData | null;
   weatherData: WeatherData | null;
+  marineData?: MarineData | null;
   moonData: MoonPhaseData;
   species: string[];
   date: Date;
@@ -99,9 +100,9 @@ function calculateSaltwaterFactors(input: ScoreInput): FactorScore[] {
     },
     {
       factor: "Wind",
-      score: scoreWind(input.buoyData, input.weatherData),
+      score: scoreWind(input.buoyData, input.weatherData, input.marineData ?? null),
       weight: w.wind,
-      details: getWindDetails(input.buoyData, input.weatherData),
+      details: getWindDetails(input.buoyData, input.weatherData, input.marineData ?? null),
     },
     {
       factor: "Barometric Pressure",
@@ -268,8 +269,25 @@ function scoreWaterTemp(buoy: BuoyData | null, species: string[]): number {
   return 10;
 }
 
-// WIND (Saltwater): 0-10kt ideal, degrades from there
-function scoreWind(buoy: BuoyData | null, weather: WeatherData | null): number {
+// WIND (Saltwater): 0-10kt ideal, degrades from there.
+// Active NOAA marine warnings cap the score regardless of measured speed.
+function scoreWind(
+  buoy: BuoyData | null,
+  weather: WeatherData | null,
+  marine: MarineData | null = null
+): number {
+  // Official NOAA storm/gale warnings override measured wind — conditions are dangerous
+  if (marine?.hasStormWarning) return 5;
+  if (marine?.hasGaleWarning) return 10;
+  if (marine?.hasAdvisory) {
+    // Advisory is active — cap at 30 even if buoy reads low right now
+    const raw = scoreWindRaw(buoy, weather);
+    return Math.min(raw, 30);
+  }
+  return scoreWindRaw(buoy, weather);
+}
+
+function scoreWindRaw(buoy: BuoyData | null, weather: WeatherData | null): number {
   const windSpeed = buoy?.latest.windSpeed ?? weather?.current.windMph ?? null;
   if (windSpeed === null) return 50;
 
@@ -432,7 +450,9 @@ function calculateSpeciesScores(input: ScoreInput): SpeciesScore[] {
     }
 
     // Species score = blend of water temp (60%) and overall conditions (40%)
-    const overallBase = input.weatherData ? scoreWind(input.buoyData, input.weatherData) : 50;
+    const overallBase = input.weatherData
+      ? scoreWind(input.buoyData, input.weatherData, input.marineData ?? null)
+      : 50;
     const score = clamp(Math.round(tempScore * 0.6 + overallBase * 0.4), 0, 100);
 
     return {
@@ -466,14 +486,26 @@ function getWaterTempDetails(buoy: BuoyData | null): string {
   return `${buoy.latest.waterTemp.toFixed(1)}°F`;
 }
 
-function getWindDetails(buoy: BuoyData | null, weather: WeatherData | null): string {
+function getWindDetails(
+  buoy: BuoyData | null,
+  weather: WeatherData | null,
+  marine: MarineData | null = null
+): string {
+  const advisory = marine?.hasStormWarning
+    ? " ⚠ Storm Warning"
+    : marine?.hasGaleWarning
+    ? " ⚠ Gale Warning"
+    : marine?.hasAdvisory
+    ? " ⚠ Advisory Active"
+    : "";
+
   if (buoy) {
-    return `${buoy.latest.windSpeed.toFixed(1)} kt from ${buoy.latest.windDirection}°`;
+    return `${buoy.latest.windSpeed.toFixed(1)} kt from ${buoy.latest.windDirection}°${advisory}`;
   }
   if (weather) {
-    return `${weather.current.windMph} mph ${weather.current.windDir}`;
+    return `${weather.current.windMph} mph ${weather.current.windDir}${advisory}`;
   }
-  return "No wind data";
+  return advisory ? `No wind data${advisory}` : "No wind data";
 }
 
 function getPressureDetails(buoy: BuoyData | null): string {
