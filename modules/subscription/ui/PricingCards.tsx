@@ -19,7 +19,7 @@ const plans: {
   {
     plan: "FRESHWATER",
     name: "Freshwater",
-    price: "$7",
+    price: "$8.99",
     period: "/ 3 months",
     description: "All freshwater zones",
     features: [
@@ -34,7 +34,7 @@ const plans: {
   {
     plan: "ALL_ACCESS",
     name: "All Access",
-    price: "$12",
+    price: "$12.99",
     period: "/ 3 months",
     description: "Everything, all zones",
     features: [
@@ -52,7 +52,7 @@ const plans: {
   {
     plan: "SALTWATER",
     name: "Saltwater",
-    price: "$7",
+    price: "$8.99",
     period: "/ 3 months",
     description: "All saltwater zones",
     features: [

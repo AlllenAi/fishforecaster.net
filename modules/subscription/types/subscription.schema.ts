@@ -24,9 +24,9 @@ export type CreateCheckoutInput = CheckoutInput;
 // ─── Price Constants (in cents) ──────────────────────────
 
 export const PLAN_PRICES: Record<SubscriptionPlan, number> = {
-  FRESHWATER: 700,
-  SALTWATER: 700,
-  ALL_ACCESS: 1200,
+  FRESHWATER: 899,
+  SALTWATER: 899,
+  ALL_ACCESS: 1299,
 };
 
 export const PLAN_DISPLAY_NAMES: Record<SubscriptionPlan, string> = {
@@ -48,7 +48,7 @@ export const ACCESS_PERIOD_MONTHS = 3;
 export const PLAN_CONFIG = {
   FRESHWATER: {
     name: "Freshwater",
-    price: "$7",
+    price: "$8.99",
     period: "/3 months",
     description: "All freshwater zones",
     features: [
@@ -62,7 +62,7 @@ export const PLAN_CONFIG = {
   },
   SALTWATER: {
     name: "Saltwater",
-    price: "$7",
+    price: "$8.99",
     period: "/3 months",
     description: "All saltwater zones",
     features: [
@@ -76,7 +76,7 @@ export const PLAN_CONFIG = {
   },
   ALL_ACCESS: {
     name: "All Access",
-    price: "$12",
+    price: "$12.99",
     period: "/3 months",
     description: "Everything, all zones",
     badge: "Best Value",

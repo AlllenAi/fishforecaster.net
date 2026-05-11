@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 const plans = [
   {
     name: "Freshwater",
-    price: "$7",
+    price: "$8.99",
     period: "/ 3 months",
     description: "All freshwater zones",
     features: [
@@ -21,7 +21,7 @@ const plans = [
   },
   {
     name: "All Access",
-    price: "$12",
+    price: "$12.99",
     period: "/ 3 months",
     description: "Everything, all zones",
     features: [
@@ -38,7 +38,7 @@ const plans = [
   },
   {
     name: "Saltwater",
-    price: "$7",
+    price: "$8.99",
     period: "/ 3 months",
     description: "All saltwater zones",
     features: [
