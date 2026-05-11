@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { get } from "@vercel/blob";
+import { head } from "@vercel/blob";
 
 export async function GET(request: NextRequest) {
   const url = request.nextUrl.searchParams.get("url");
@@ -9,21 +9,23 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const blob = await get(url, {
+    const blobInfo = await head(url, {
       token: process.env.BLOB_READ_WRITE_TOKEN!,
-      access: "private",
     });
 
-    if (!blob) {
+    if (!blobInfo) {
       return NextResponse.json({ error: "Image not found" }, { status: 404 });
     }
 
-    const contentType =
-      blob.headers.get("content-type") || "application/octet-stream";
+    const response = await fetch(blobInfo.downloadUrl);
 
-    return new NextResponse(blob.stream as ReadableStream, {
+    if (!response.ok) {
+      return NextResponse.json({ error: "Image not found" }, { status: 404 });
+    }
+
+    return new NextResponse(response.body, {
       headers: {
-        "Content-Type": contentType,
+        "Content-Type": blobInfo.contentType || "application/octet-stream",
         "Cache-Control": "public, max-age=2592000, immutable",
       },
     });

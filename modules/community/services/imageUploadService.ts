@@ -31,7 +31,7 @@ export async function uploadCommunityPhotos(
     const filename = `community/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
     const blob = await put(filename, file, {
-      access: "private",
+      access: "public",
       addRandomSuffix: false,
     });
 

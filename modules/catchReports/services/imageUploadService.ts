@@ -24,7 +24,7 @@ export async function uploadCatchPhoto(
 
   // Upload to Vercel Blob
   const blob = await put(filename, file, {
-    access: "private",
+    access: "public",
     addRandomSuffix: false,
   });
 
