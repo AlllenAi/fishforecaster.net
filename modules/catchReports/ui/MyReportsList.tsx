@@ -43,23 +43,21 @@ export function MyReportsList() {
       {reports.map((report) => (
         <div key={report.id} className="relative">
           <CatchReportCard report={report} />
-          {!report.isVerified && (
-            <div className="absolute right-3 top-3">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                disabled={isDeleting}
-                onClick={() => {
-                  if (confirm("Delete this catch report?")) {
-                    deleteReport(report.id);
-                  }
-                }}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
+          <div className="absolute right-3 top-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+              disabled={isDeleting}
+              onClick={() => {
+                if (confirm("Delete this catch report?")) {
+                  deleteReport(report.id);
+                }
+              }}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       ))}
     </div>

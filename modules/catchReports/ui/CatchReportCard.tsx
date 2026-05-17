@@ -33,7 +33,7 @@ export function CatchReportCard({ report }: { report: CatchReportWithUser }) {
             alt={`${report.species} catch`}
             width={400}
             height={160}
-            className="h-40 w-full object-cover"
+            className="h-40 w-full object-contain bg-muted"
           />
         </div>
       )}
