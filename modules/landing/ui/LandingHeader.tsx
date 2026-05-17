@@ -26,14 +26,14 @@ export function LandingHeader() {
           : "bg-transparent"
       )}
     >
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
+      <div className="mx-auto flex h-24 max-w-6xl items-center justify-between px-4">
         <Link href="/" className="flex items-center">
           <Image
             src="/logo.jpg"
             alt="fishforecaster.net"
-            width={140}
-            height={40}
-            className="h-10 w-auto object-contain"
+            width={360}
+            height={108}
+            className="h-20 w-auto object-contain"
             priority
           />
         </Link>

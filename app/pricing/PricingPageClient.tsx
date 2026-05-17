@@ -49,9 +49,9 @@ export function PricingPageClient({ currentTier, isLoggedIn }: PricingPageClient
             <Image
               src="/logo.jpg"
               alt="fishforecaster.net"
-              width={140}
-              height={40}
-              className="h-10 w-auto object-contain"
+              width={360}
+              height={108}
+              className="h-20 w-auto object-contain"
               priority
             />
           </Link>

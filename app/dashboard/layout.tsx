@@ -22,7 +22,7 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
+        <div className="mx-auto flex h-24 max-w-7xl items-center justify-between px-4">
           <div className="flex items-center gap-6">
             <Link
               href="/dashboard"
@@ -31,9 +31,9 @@ export default async function DashboardLayout({
               <Image
                 src="/logo.jpg"
                 alt="fishforecaster.net"
-                width={140}
-                height={40}
-                className="h-10 w-auto object-contain"
+                width={360}
+                height={108}
+                className="h-20 w-auto object-contain"
                 priority
               />
             </Link>

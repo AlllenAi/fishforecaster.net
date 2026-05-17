@@ -16,9 +16,9 @@ export default function LoginPage() {
             <Image
               src="/logo.jpg"
               alt="fishforecaster.net"
-              width={200}
-              height={60}
-              className="h-16 w-auto object-contain"
+              width={360}
+              height={108}
+              className="h-28 w-auto object-contain"
               priority
             />
           </div>
