@@ -57,7 +57,7 @@ export function HeroSection() {
           <div className="relative overflow-hidden rounded-2xl border bg-card/50 backdrop-blur aspect-video">
             <iframe
               src="https://www.youtube.com/embed/7h0ETkUD2Eg"
-              title="TheFishForecaster Promo"
+              title="fishforecaster.net Promo"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
               className="absolute inset-0 h-full w-full"

@@ -50,7 +50,7 @@ export const createCheckoutSession = withAccess(
           price_data: {
             currency: "usd",
             product_data: {
-              name: `The Fish Forecaster — ${planName}`,
+              name: `fishforecaster.net — ${planName}`,
               description: `${ACCESS_PERIOD_MONTHS} months of ${planName.toLowerCase()} zone forecasts`,
             },
             unit_amount: priceInCents,

@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Fish, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function LandingHeader() {
@@ -26,10 +27,15 @@ export function LandingHeader() {
       )}
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2 text-lg font-bold">
-          <Fish className="h-5 w-5 text-primary" />
-          <span className="hidden sm:inline">The Fish Forecaster</span>
-          <span className="sm:hidden">TFF</span>
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/logo.jpg"
+            alt="fishforecaster.net"
+            width={140}
+            height={40}
+            className="h-10 w-auto object-contain"
+            priority
+          />
         </Link>
 
         {/* Desktop nav */}

@@ -1,7 +1,7 @@
 import { CatchReportForm } from "@/modules/catchReports/ui/CatchReportForm";
 
 export const metadata = {
-  title: "Report a Catch - The Fish Forecaster",
+  title: "Report a Catch - fishforecaster.net",
 };
 
 export default function NewCatchPage() {

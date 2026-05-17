@@ -3,8 +3,8 @@ import Link from "next/link";
 import { Fish } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | The Fish Forecaster",
-  description: "How The Fish Forecaster collects, uses, and protects your data.",
+  title: "Privacy Policy | fishforecaster.net",
+  description: "How fishforecaster.net collects, uses, and protects your data.",
 };
 
 export default function PrivacyPolicyPage() {
@@ -14,7 +14,7 @@ export default function PrivacyPolicyPage() {
         <div className="mb-8 flex items-center gap-2">
           <Fish className="h-6 w-6 text-primary" />
           <Link href="/" className="text-lg font-bold hover:text-primary">
-            The Fish Forecaster
+            fishforecaster.net
           </Link>
         </div>
 
@@ -185,10 +185,10 @@ export default function PrivacyPolicyPage() {
               If you have questions about this privacy policy or your data,
               contact us at{" "}
               <a
-                href="mailto:privacy@thefishforecaster.com"
+                href="mailto:privacy@fishforecaster.net"
                 className="text-primary underline hover:no-underline"
               >
-                privacy@thefishforecaster.com
+                privacy@fishforecaster.net
               </a>
               .
             </p>
@@ -197,7 +197,7 @@ export default function PrivacyPolicyPage() {
 
         <div className="mt-12 border-t pt-6 text-center">
           <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
-            &larr; Back to The Fish Forecaster
+            &larr; Back to fishforecaster.net
           </Link>
         </div>
       </div>

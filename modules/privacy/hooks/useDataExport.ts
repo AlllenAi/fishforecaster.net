@@ -19,7 +19,7 @@ export function useDataExport() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = "thefishforecaster-data-export.json";
+      link.download = "fishforecaster-net-data-export.json";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

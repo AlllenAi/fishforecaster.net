@@ -3,7 +3,7 @@ import { CatchMapContent } from "@/modules/catchReports/ui/CatchMapContent";
 import { MapTabs } from "@/modules/catchReports/ui/MapTabs";
 
 export const metadata = {
-  title: "Map - The Fish Forecaster",
+  title: "Map - fishforecaster.net",
 };
 
 export default function MapPage() {

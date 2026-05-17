@@ -13,7 +13,7 @@ function getResend(): Resend {
 }
 
 const FROM =
-  `${process.env.EMAIL_FROM_NAME || "The Fish Forecaster"} <${process.env.EMAIL_FROM_ADDRESS || "forecasts@thefishforecaster.com"}>`;
+  `${process.env.EMAIL_FROM_NAME || "fishforecaster.net"} <${process.env.EMAIL_FROM_ADDRESS || "forecasts@fishforecaster.net"}>`;
 
 export async function sendEmail(
   to: string,

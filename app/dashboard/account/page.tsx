@@ -5,7 +5,7 @@ import { DeleteAccountSection } from "@/modules/privacy/ui/DeleteAccountSection"
 import { Download, ShieldAlert } from "lucide-react";
 
 export const metadata = {
-  title: "Account & Billing | The Fish Forecaster",
+  title: "Account & Billing | fishforecaster.net",
 };
 
 export default function AccountPage() {

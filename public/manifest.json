@@ -1,6 +1,6 @@
 {
-  "name": "The Fish Forecaster",
-  "short_name": "Fish Forecaster",
+  "name": "fishforecaster.net",
+  "short_name": "fishforecaster.net",
   "description": "AI-powered fishing forecasts for Southern California",
   "start_url": "/dashboard",
   "display": "standalone",

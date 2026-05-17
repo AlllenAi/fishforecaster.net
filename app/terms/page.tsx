@@ -3,8 +3,8 @@ import Link from "next/link";
 import { Fish } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Terms of Service | The Fish Forecaster",
-  description: "Terms and conditions for using The Fish Forecaster.",
+  title: "Terms of Service | fishforecaster.net",
+  description: "Terms and conditions for using fishforecaster.net.",
 };
 
 export default function TermsOfServicePage() {
@@ -14,7 +14,7 @@ export default function TermsOfServicePage() {
         <div className="mb-8 flex items-center gap-2">
           <Fish className="h-6 w-6 text-primary" />
           <Link href="/" className="text-lg font-bold hover:text-primary">
-            The Fish Forecaster
+            fishforecaster.net
           </Link>
         </div>
 
@@ -29,7 +29,7 @@ export default function TermsOfServicePage() {
               1. Acceptance of Terms
             </h2>
             <p className="mt-2">
-              By creating an account or using The Fish Forecaster, you agree to
+              By creating an account or using fishforecaster.net, you agree to
               these Terms of Service and our{" "}
               <Link
                 href="/privacy"
@@ -46,7 +46,7 @@ export default function TermsOfServicePage() {
               2. Description of Service
             </h2>
             <p className="mt-2">
-              The Fish Forecaster provides AI-powered fishing forecasts, bite
+              fishforecaster.net provides AI-powered fishing forecasts, bite
               window predictions, and community catch reports for Southern
               California fishing zones. The service is available as a web
               application with free and paid subscription tiers.
@@ -116,7 +116,7 @@ export default function TermsOfServicePage() {
                 Fishing forecasts are predictions based on weather, tide, moon
                 phase, and historical data. They are not guarantees.
               </strong>{" "}
-              Actual fishing conditions may vary. The Fish Forecaster is not
+              Actual fishing conditions may vary. fishforecaster.net is not
               responsible for fishing outcomes, and forecasts should not be
               relied upon for safety decisions. Always check local weather and
               marine conditions before heading out.
@@ -128,7 +128,7 @@ export default function TermsOfServicePage() {
               7. Intellectual Property
             </h2>
             <p className="mt-2">
-              The Fish Forecaster name, logo, forecasting algorithms, and
+              fishforecaster.net name, logo, forecasting algorithms, and
               website content are our property. Catch reports and photos you
               submit remain yours, but you grant us a license to display them
               on the platform and use aggregated data to improve forecasts.
@@ -140,7 +140,7 @@ export default function TermsOfServicePage() {
               8. Limitation of Liability
             </h2>
             <p className="mt-2">
-              The Fish Forecaster is provided &ldquo;as is&rdquo; without
+              fishforecaster.net is provided &ldquo;as is&rdquo; without
               warranties of any kind. We are not liable for any damages
               resulting from your use of the service, including but not limited
               to lost catches, incorrect forecasts, or service downtime.
@@ -183,10 +183,10 @@ export default function TermsOfServicePage() {
             <p className="mt-2">
               Questions about these terms? Contact us at{" "}
               <a
-                href="mailto:support@thefishforecaster.com"
+                href="mailto:support@fishforecaster.net"
                 className="text-primary underline hover:no-underline"
               >
-                support@thefishforecaster.com
+                support@fishforecaster.net
               </a>
               .
             </p>
@@ -195,7 +195,7 @@ export default function TermsOfServicePage() {
 
         <div className="mt-12 border-t pt-6 text-center">
           <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
-            &larr; Back to The Fish Forecaster
+            &larr; Back to fishforecaster.net
           </Link>
         </div>
       </div>

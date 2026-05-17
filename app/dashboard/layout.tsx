@@ -4,7 +4,7 @@ import { DashboardNav } from "@/components/layout/DashboardNav";
 import { UserMenu } from "@/components/layout/UserMenu";
 import { ModeToggle } from "@/components/darkmode-toggle";
 import Link from "next/link";
-import { Fish } from "lucide-react";
+import Image from "next/image";
 
 export default async function DashboardLayout({
   children,
@@ -26,11 +26,16 @@ export default async function DashboardLayout({
           <div className="flex items-center gap-6">
             <Link
               href="/dashboard"
-              className="flex items-center gap-2 text-lg font-bold tracking-tight"
+              className="flex items-center"
             >
-              <Fish className="h-5 w-5 text-primary" />
-              <span className="hidden sm:inline">The Fish Forecaster</span>
-              <span className="sm:hidden">TFF</span>
+              <Image
+                src="/logo.jpg"
+                alt="fishforecaster.net"
+                width={140}
+                height={40}
+                className="h-10 w-auto object-contain"
+                priority
+              />
             </Link>
             <DashboardNav isAdmin={isAdmin} />
           </div>

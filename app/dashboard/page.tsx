@@ -1,7 +1,7 @@
 import { DashboardContent } from "@/modules/forecast/ui/DashboardContent";
 
 export const metadata = {
-  title: "Dashboard - The Fish Forecaster",
+  title: "Dashboard - fishforecaster.net",
 };
 
 export default function DashboardPage() {

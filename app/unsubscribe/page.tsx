@@ -1,5 +1,5 @@
 import { unsubscribe } from "@/modules/email/serverActions/email.action";
-import { Fish } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 interface UnsubscribePageProps {
@@ -20,12 +20,14 @@ export default async function UnsubscribePage({ searchParams }: UnsubscribePageP
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md text-center">
-        <Link
-          href="/"
-          className="mb-8 inline-flex items-center gap-2 text-lg font-bold"
-        >
-          <Fish className="h-5 w-5 text-primary" />
-          The Fish Forecaster
+        <Link href="/" className="mb-8 inline-flex">
+          <Image
+            src="/logo.jpg"
+            alt="fishforecaster.net"
+            width={160}
+            height={48}
+            className="h-12 w-auto object-contain"
+          />
         </Link>
 
         <div className="rounded-xl border p-8">

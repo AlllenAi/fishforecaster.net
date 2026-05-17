@@ -10,7 +10,7 @@ interface WelcomeEmailProps {
 
 export function WelcomeEmail({ name, baseUrl }: WelcomeEmailProps) {
   return (
-    <BaseTemplate preview={`Welcome to The Fish Forecaster, ${name}!`}>
+    <BaseTemplate preview={`Welcome to fishforecaster.net, ${name}!`}>
       <Text style={heading}>Welcome aboard, {name}!</Text>
       <Text style={paragraph}>
         Your account is all set. Here&apos;s how to get the most out of The Fish

@@ -1,7 +1,7 @@
 import { ZoneDetailContent } from "@/modules/forecast/ui/ZoneDetailContent";
 
 export const metadata = {
-  title: "Zone Forecast - The Fish Forecaster",
+  title: "Zone Forecast - fishforecaster.net",
 };
 
 export default async function ZoneDetailPage({

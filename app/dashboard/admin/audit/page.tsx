@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { AdminAuditLog } from "@/modules/admin/ui/AdminAuditLog";
 
 export const metadata = {
-  title: "Audit Log - Admin - The Fish Forecaster",
+  title: "Audit Log - Admin - fishforecaster.net",
 };
 
 export default async function AuditLogPage() {

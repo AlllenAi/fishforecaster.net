@@ -27,7 +27,7 @@ export function BaseTemplate({ preview, children, unsubscribeUrl }: BaseTemplate
         <Container style={container}>
           <Section style={header}>
             <Text style={logo}>
-              <span style={{ fontSize: "24px" }}>&#x1F3A3;</span> The Fish Forecaster
+              <span style={{ fontSize: "24px" }}>&#x1F3A3;</span> fishforecaster.net
             </Text>
           </Section>
 
@@ -38,7 +38,7 @@ export function BaseTemplate({ preview, children, unsubscribeUrl }: BaseTemplate
           <Hr style={hr} />
           <Section style={footer}>
             <Text style={footerText}>
-              &copy; {new Date().getFullYear()} The Fish Forecaster. All rights reserved.
+              &copy; {new Date().getFullYear()} fishforecaster.net. All rights reserved.
             </Text>
             {unsubscribeUrl && (
               <Text style={footerText}>

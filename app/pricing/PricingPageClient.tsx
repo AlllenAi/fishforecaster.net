@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Fish, ChevronDown } from "lucide-react";
+import Image from "next/image";
+import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PricingCards } from "@/modules/subscription/ui/PricingCards";
 
@@ -44,12 +45,15 @@ export function PricingPageClient({ currentTier, isLoggedIn }: PricingPageClient
       {/* Nav */}
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-lg font-bold tracking-tight"
-          >
-            <Fish className="h-5 w-5 text-primary" />
-            The Fish Forecaster
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/logo.jpg"
+              alt="fishforecaster.net"
+              width={140}
+              height={40}
+              className="h-10 w-auto object-contain"
+              priority
+            />
           </Link>
           <div className="flex items-center gap-2">
             {currentTier ? (

@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Fish } from "lucide-react";
 
 export function FooterCTA() {
   return (
@@ -27,8 +27,8 @@ export function FooterCTA() {
       <div className="mx-auto max-w-6xl border-t py-8">
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Fish className="h-4 w-4 text-primary" />
-            <span>&copy; 2026 The Fish Forecaster. All rights reserved.</span>
+            <Image src="/logo.jpg" alt="fishforecaster.net" width={80} height={24} className="h-6 w-auto object-contain" />
+            <span>&copy; 2026 fishforecaster.net. All rights reserved.</span>
           </div>
           <div className="flex gap-6 text-sm text-muted-foreground">
             <Link href="/privacy" className="hover:text-foreground transition-colors">

@@ -23,7 +23,7 @@ function ensureConfigured() {
   }
 
   webpush.setVapidDetails(
-    `mailto:${process.env.EMAIL_FROM_ADDRESS || "support@thefishforecaster.com"}`,
+    `mailto:${process.env.EMAIL_FROM_ADDRESS || "support@fishforecaster.net"}`,
     publicKey,
     privateKey
   );

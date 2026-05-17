@@ -14,11 +14,11 @@ const geistSans = Geist({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "https://thefishforecaster.com"
+    process.env.NEXT_PUBLIC_APP_URL || "https://fishforecaster.net"
   ),
   title: {
-    default: "The Fish Forecaster - Know When The Fish Will Bite",
-    template: "%s | The Fish Forecaster",
+    default: "fishforecaster.net - Know When The Fish Will Bite",
+    template: "%s | fishforecaster.net",
   },
   description:
     "AI-powered fishing forecasts for Southern California. Daily bite scores, best fishing windows, and species predictions for 13 saltwater and freshwater zones.",
@@ -26,14 +26,14 @@ export const metadata: Metadata = {
     "fishing forecast, bite score, SoCal fishing, tide fishing, fishing weather, fishing moon phase",
   openGraph: {
     type: "website",
-    siteName: "The Fish Forecaster",
-    title: "The Fish Forecaster - Know When The Fish Will Bite",
+    siteName: "fishforecaster.net",
+    title: "fishforecaster.net - Know When The Fish Will Bite",
     description:
       "AI-powered fishing forecasts for Southern California. Daily bite scores, best fishing windows, and species predictions.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "The Fish Forecaster - Know When The Fish Will Bite",
+    title: "fishforecaster.net - Know When The Fish Will Bite",
     description:
       "AI-powered fishing forecasts for Southern California. Daily bite scores, best fishing windows, and species predictions.",
   },

@@ -63,7 +63,7 @@ export async function sendWelcomeEmail(userId: string) {
 
   const result = await sendEmail(
     user.email,
-    "Welcome to The Fish Forecaster",
+    "Welcome to fishforecaster.net",
     html
   );
 

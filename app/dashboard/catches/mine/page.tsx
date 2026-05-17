@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
 export const metadata = {
-  title: "My Catches - The Fish Forecaster",
+  title: "My Catches - fishforecaster.net",
 };
 
 export default function MyCatchesPage() {
