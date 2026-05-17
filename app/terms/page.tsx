@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Fish } from "lucide-react";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "Terms of Service | fishforecaster.net",
@@ -11,10 +11,15 @@ export default function TermsOfServicePage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-3xl px-4 py-16">
-        <div className="mb-8 flex items-center gap-2">
-          <Fish className="h-6 w-6 text-primary" />
-          <Link href="/" className="text-lg font-bold hover:text-primary">
-            fishforecaster.net
+        <div className="mb-8">
+          <Link href="/">
+            <Image
+              src="/logo.jpg"
+              alt="fishforecaster.net"
+              width={200}
+              height={60}
+              className="h-16 w-auto object-contain"
+            />
           </Link>
         </div>
 
