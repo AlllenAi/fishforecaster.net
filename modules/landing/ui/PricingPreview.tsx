@@ -62,9 +62,6 @@ export function PricingPreview() {
         <p className="mx-auto mt-4 max-w-2xl text-center text-muted-foreground">
           Choose the water you fish. One-time payment, 3 months access.
         </p>
-        <p className="mt-2 text-center text-sm font-medium text-primary">
-          7-day free trial included — no credit card required to start.
-        </p>
 
         <div className="mt-12 grid gap-6 sm:grid-cols-3">
           {plans.map((plan) => (
@@ -107,7 +104,7 @@ export function PricingPreview() {
                 variant={plan.highlighted ? "default" : "outline"}
                 asChild
               >
-                <a href="/register">Start Free 7-Day Trial</a>
+                <a href="/register">Get Started</a>
               </Button>
             </div>
           ))}

@@ -35,7 +35,7 @@ const faqs = [
   {
     question: "Do you offer a free trial?",
     answer:
-      "Yes! Every new account includes a 7-day free trial — no credit card required to start. At the end of the trial, choose the plan that fits your fishing and pay only when you're ready.",
+      "We offer a live demo on our homepage so you can see exactly what the forecasts look like before you buy. You can cancel within the first 24 hours for a full refund if you're not satisfied.",
   },
 ];
 
