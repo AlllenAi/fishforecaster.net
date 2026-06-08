@@ -20,8 +20,7 @@ function generateToken(): string {
 
 // ─── Send Lead Magnet Email ──────────────────────────────────
 
-export async function sendLeadMagnet(email: string) {
-  // Get or create unsubscribe token for this lead
+export async function sendLeadMagnet(email: string, fishingType: string = "both") {
   const lead = await prisma.lead.findUnique({ where: { email } });
   let token = lead?.unsubscribeToken;
 
@@ -35,11 +34,17 @@ export async function sendLeadMagnet(email: string) {
 
   const unsubscribeUrl = `${BASE_URL}/unsubscribe?token=${token}&type=lead`;
 
-  const html = await renderLeadMagnetEmail({ baseUrl: BASE_URL, unsubscribeUrl });
+  const html = await renderLeadMagnetEmail({ baseUrl: BASE_URL, unsubscribeUrl, fishingType });
+
+  const subjectMap: Record<string, string> = {
+    salt: "Your SoCal Saltwater Bite Window Cheat Sheet",
+    fresh: "Your SoCal Freshwater Bite Window Cheat Sheet",
+    both: "Your SoCal Bite Window Cheat Sheet",
+  };
 
   const result = await sendEmail(
     email,
-    "Your SoCal Bite Window Cheat Sheet",
+    subjectMap[fishingType] ?? subjectMap.both,
     html
   );
 

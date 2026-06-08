@@ -6,9 +6,9 @@ import { captureLead } from "../serverActions/lead.action";
 
 export function useLeadCapture() {
   return useMutation({
-    mutationFn: (email: string) => captureLead({ email }),
+    mutationFn: (input: { email: string; fishingType: string }) => captureLead(input),
     onSuccess: () => {
-      toast.success("You're in! Check your email for the cheat sheet.");
+      toast.success("You're in! Check your email for your cheat sheet.");
     },
     onError: (error: Error) => {
       toast.error(error.message || "Something went wrong. Please try again.");

@@ -205,6 +205,7 @@ model Lead {
   id                     String   @id @default(auto()) @map("_id") @db.ObjectId
   email                  String   @unique
   source                 String   @default("landing_page")
+  fishingType            String   @default("both") // "salt", "fresh", "both"
   subscribedToNewsletter Boolean  @default(true)
   unsubscribeToken       String?  @unique
   createdAt              DateTime @default(now())

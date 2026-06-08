@@ -6,15 +6,49 @@ import { BaseTemplate } from "./BaseTemplate";
 interface LeadMagnetEmailProps {
   baseUrl: string;
   unsubscribeUrl: string;
+  fishingType?: string;
 }
 
-export function LeadMagnetEmail({ baseUrl, unsubscribeUrl }: LeadMagnetEmailProps) {
+const zonesByType: Record<string, Array<{ zone: string; window: string; species: string }>> = {
+  salt: [
+    { zone: "San Clemente Basin", window: "5:30 — 8:00 AM", species: "Bluefin, Yellowtail" },
+    { zone: "Dana Point", window: "6:00 — 8:30 AM", species: "Halibut, Calico Bass" },
+    { zone: "Newport Pier", window: "5:45 — 7:30 AM", species: "Corbina, Yellowfin Croaker" },
+    { zone: "Catalina Island", window: "5:30 — 8:00 AM", species: "White Seabass, Yellowtail" },
+    { zone: "San Diego Bay", window: "6:00 — 8:00 AM", species: "Halibut, Spotfin Croaker" },
+  ],
+  fresh: [
+    { zone: "Lake Perris", window: "6:00 — 9:00 AM", species: "Largemouth Bass, Trout" },
+    { zone: "Lake Elsinore", window: "6:30 — 9:30 AM", species: "Striped Bass, Catfish" },
+    { zone: "Castaic Lake", window: "5:30 — 8:30 AM", species: "Largemouth Bass, Striped Bass" },
+    { zone: "Lake Skinner", window: "6:00 — 9:00 AM", species: "Rainbow Trout, Catfish" },
+    { zone: "Dixon Lake", window: "6:30 — 9:00 AM", species: "Rainbow Trout, Largemouth Bass" },
+  ],
+  both: [
+    { zone: "San Clemente Basin", window: "5:30 — 8:00 AM", species: "Bluefin, Yellowtail" },
+    { zone: "Dana Point", window: "6:00 — 8:30 AM", species: "Halibut, Calico Bass" },
+    { zone: "Catalina Island", window: "5:30 — 8:00 AM", species: "White Seabass, Yellowtail" },
+    { zone: "Lake Perris", window: "6:00 — 9:00 AM", species: "Largemouth Bass, Trout" },
+    { zone: "Castaic Lake", window: "5:30 — 8:30 AM", species: "Largemouth Bass, Striped Bass" },
+  ],
+};
+
+const titleByType: Record<string, string> = {
+  salt: "Your SoCal Saltwater Bite Window Cheat Sheet",
+  fresh: "Your SoCal Freshwater Bite Window Cheat Sheet",
+  both: "Your SoCal Bite Window Cheat Sheet",
+};
+
+export function LeadMagnetEmail({ baseUrl, unsubscribeUrl, fishingType = "both" }: LeadMagnetEmailProps) {
+  const zones = zonesByType[fishingType] ?? zonesByType.both;
+  const title = titleByType[fishingType] ?? titleByType.both;
+
   return (
     <BaseTemplate
-      preview="Your SoCal Bite Window Cheat Sheet is here!"
+      preview={`${title} is here!`}
       unsubscribeUrl={unsubscribeUrl}
     >
-      <Text style={heading}>Your SoCal Bite Window Cheat Sheet</Text>
+      <Text style={heading}>{title}</Text>
       <Text style={paragraph}>
         Thanks for signing up! Here are the top bite window tips that SoCal anglers
         swear by — backed by the same data our forecast engine uses.
@@ -58,31 +92,13 @@ export function LeadMagnetEmail({ baseUrl, unsubscribeUrl }: LeadMagnetEmailProp
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td style={td}>San Clemente Basin</td>
-              <td style={td}>5:30 — 8:00 AM</td>
-              <td style={td}>Bluefin, Yellowtail</td>
-            </tr>
-            <tr>
-              <td style={tdAlt}>Dana Point</td>
-              <td style={tdAlt}>6:00 — 8:30 AM</td>
-              <td style={tdAlt}>Halibut, Calico Bass</td>
-            </tr>
-            <tr>
-              <td style={td}>Newport Pier</td>
-              <td style={td}>5:45 — 7:30 AM</td>
-              <td style={td}>Corbina, Yellowfin Croaker</td>
-            </tr>
-            <tr>
-              <td style={tdAlt}>Catalina Island</td>
-              <td style={tdAlt}>5:30 — 8:00 AM</td>
-              <td style={tdAlt}>White Seabass, Yellowtail</td>
-            </tr>
-            <tr>
-              <td style={td}>Lake Perris</td>
-              <td style={td}>6:00 — 9:00 AM</td>
-              <td style={td}>Largemouth Bass, Trout</td>
-            </tr>
+            {zones.map((row, i) => (
+              <tr key={row.zone}>
+                <td style={i % 2 === 0 ? td : tdAlt}>{row.zone}</td>
+                <td style={i % 2 === 0 ? td : tdAlt}>{row.window}</td>
+                <td style={i % 2 === 0 ? td : tdAlt}>{row.species}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </Section>

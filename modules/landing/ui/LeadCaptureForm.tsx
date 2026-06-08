@@ -7,12 +7,13 @@ import { Mail, Check } from "lucide-react";
 
 export function LeadCaptureForm() {
   const [email, setEmail] = useState("");
+  const [fishingType, setFishingType] = useState("both");
   const { mutate, isPending, isSuccess } = useLeadCapture();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (email.trim()) {
-      mutate(email.trim());
+      mutate({ email: email.trim(), fishingType });
     }
   };
 
@@ -25,7 +26,7 @@ export function LeadCaptureForm() {
           </div>
 
           <h2 className="mt-6 text-2xl font-bold tracking-tight sm:text-3xl">
-            Get the Free SoCal
+            Get Your Free SoCal
             <span className="text-primary"> Bite Window Cheat Sheet</span>
           </h2>
           <p className="mt-3 text-muted-foreground">
@@ -39,11 +40,38 @@ export function LeadCaptureForm() {
               </div>
               <p className="text-lg font-semibold">You&apos;re in!</p>
               <p className="text-sm text-muted-foreground">
-                Check your email for the cheat sheet.
+                Check your email for your personalized cheat sheet.
               </p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="mt-8">
+            <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+              {/* Fishing type selector */}
+              <div>
+                <p className="mb-2 text-sm font-medium text-foreground">
+                  What do you fish?
+                </p>
+                <div className="flex gap-1 rounded-lg border bg-muted/50 p-1">
+                  {[
+                    { value: "salt", label: "Saltwater" },
+                    { value: "fresh", label: "Freshwater" },
+                    { value: "both", label: "Both" },
+                  ].map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setFishingType(opt.value)}
+                      className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors ${
+                        fishingType === opt.value
+                          ? "bg-background text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="flex flex-col gap-3 sm:flex-row">
                 <input
                   type="email"
@@ -57,7 +85,7 @@ export function LeadCaptureForm() {
                   {isPending ? "Joining..." : "Get Free Access"}
                 </Button>
               </div>
-              <p className="mt-3 text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 No spam, ever. Unsubscribe anytime.
               </p>
             </form>
