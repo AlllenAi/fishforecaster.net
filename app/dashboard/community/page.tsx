@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CommunityFeed } from "@/modules/community/ui/CommunityFeed";
 import { CommunityTabs } from "@/modules/community/ui/CommunityTabs";
+import { FeaturedStory } from "@/modules/community/ui/FeaturedStory";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
@@ -32,6 +33,8 @@ export default function CommunityPage() {
           </Link>
         </div>
       </div>
+
+      <FeaturedStory />
 
       <CommunityTabs />
 
