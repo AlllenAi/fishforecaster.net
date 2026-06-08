@@ -37,8 +37,6 @@ const nextConfig: NextConfig = {
   redirects: async () => [
     // Redirect all non-primary domains to thefishforecaster.com
     ...[
-      "fishforecaster.net",
-      "www.fishforecaster.net",
       "www.thefishforecaster.com",
       "thefishforecast.com",
       "www.thefishforecast.com",
