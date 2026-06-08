@@ -44,7 +44,8 @@ export async function createCheckoutSession(
   customerId: string,
   priceId: string,
   successUrl: string,
-  cancelUrl: string
+  cancelUrl: string,
+  metadata: { userId: string; plan: string }
 ): Promise<Stripe.Checkout.Session> {
   return stripe.checkout.sessions.create({
     customer: customerId,
@@ -52,6 +53,8 @@ export async function createCheckoutSession(
     line_items: [{ price: priceId, quantity: 1 }],
     success_url: successUrl,
     cancel_url: cancelUrl,
+    metadata,
+    payment_intent_data: { metadata },
   });
 }
 

@@ -9,6 +9,7 @@ import { sendEmail, sendBatchEmails } from "../services/emailService";
 import { renderLeadMagnetEmail } from "../templates/LeadMagnetEmail";
 import { renderWelcomeEmail } from "../templates/WelcomeEmail";
 import { renderWeeklyDigestEmail } from "../templates/WeeklyDigestEmail";
+import { renderPaymentReceiptEmail } from "../templates/PaymentReceiptEmail";
 import { emailPreferencesSchema } from "../types/email.schema";
 import type { DigestDay } from "../types/email.schema";
 
@@ -74,6 +75,50 @@ export async function sendWelcomeEmail(userId: string) {
 
   if (!result.success) {
     console.error(`[Email] Failed to send welcome email to ${user.email}`);
+  }
+
+  return result;
+}
+
+// ─── Send Payment Receipt ────────────────────────────────────
+
+export async function sendPaymentReceipt(
+  userId: string,
+  plan: string,
+  amount: string,
+  paymentId: string
+) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) return { success: false };
+
+  let token = user.unsubscribeToken;
+  if (!token) {
+    token = generateToken();
+    await prisma.user.update({
+      where: { id: userId },
+      data: { unsubscribeToken: token },
+    });
+  }
+
+  const unsubscribeUrl = `${BASE_URL}/unsubscribe?token=${token}&type=user`;
+
+  const html = await renderPaymentReceiptEmail({
+    name: user.name || "Angler",
+    plan,
+    amount,
+    paymentId,
+    baseUrl: BASE_URL,
+    unsubscribeUrl,
+  });
+
+  const result = await sendEmail(
+    user.email,
+    "Your Fish Forecaster Payment Receipt",
+    html
+  );
+
+  if (!result.success) {
+    console.error(`[Email] Failed to send receipt to ${user.email}`);
   }
 
   return result;

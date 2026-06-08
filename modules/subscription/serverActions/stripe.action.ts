@@ -56,7 +56,8 @@ export const createCheckout = withAccess(
       customerId,
       priceId,
       `${baseUrl}/dashboard?checkout=success`,
-      `${baseUrl}/pricing?checkout=canceled`
+      `${baseUrl}/pricing?checkout=canceled`,
+      { userId: user.userId, plan: validated.plan }
     );
 
     if (!session.url) {

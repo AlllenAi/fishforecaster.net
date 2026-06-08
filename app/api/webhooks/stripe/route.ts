@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { activateSubscription } from "@/modules/subscription/services/subscriptionService";
+import { sendPaymentReceipt } from "@/modules/email/serverActions/email.action";
 import type Stripe from "stripe";
 import type { SubscriptionPlan } from "@prisma/client";
 
@@ -64,6 +65,14 @@ export async function POST(req: NextRequest) {
           plan,
           stripePaymentId,
           stripeCustomerId
+        );
+
+        // Send receipt email (fire and forget)
+        const amountTotal = session.amount_total
+          ? `$${(session.amount_total / 100).toFixed(2)}`
+          : "—";
+        sendPaymentReceipt(userId, plan, amountTotal, stripePaymentId).catch(
+          (err) => console.error("[Stripe Webhook] Failed to send receipt:", err)
         );
 
         console.log(
