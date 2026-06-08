@@ -34,6 +34,21 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  redirects: async () => [
+    // Redirect all non-primary domains to thefishforecaster.com
+    ...[
+      "fishforecaster.net",
+      "www.fishforecaster.net",
+      "www.thefishforecaster.com",
+      "thefishforecast.com",
+      "www.thefishforecast.com",
+    ].map((host) => ({
+      source: "/:path*",
+      has: [{ type: "host" as const, value: host }],
+      destination: "https://thefishforecaster.com/:path*",
+      permanent: true,
+    })),
+  ],
   headers: async () => [
     {
       source: "/(.*)",
